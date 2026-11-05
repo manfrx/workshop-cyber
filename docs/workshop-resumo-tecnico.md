@@ -19,7 +19,7 @@ explora** (de forma guiada e segura) para entender por que certas decisões de
 segurança importam.
 
 Empresa-cenário fictícia: **Meridian Capital** (gestora de investimentos).
-Domínio corporativo legítimo usado no material: `meridiancapital.com.br`.
+Domínio corporativo legítimo usado no material: `meridiancapital.example`.
 
 | # | Tema | Vulnerabilidade | O que o participante faz |
 |---|------|-----------------|--------------------------|
@@ -224,13 +224,13 @@ psicológicos e pistas que dá pra treinar o olho a perceber.
 ### As técnicas reais ensinadas (os 5 e-mails de phishing)
 | E-mail | Técnica real demonstrada |
 |---|---|
-| Suporte TI (`@meridiancapital-ti.com`) | **Domínio sósia** + **pressão** (senha expira em 24h / bloqueio) |
-| Cobrança (`@nf-eletronica-br.com`) | **Medo/pressão** (protesto em cartório) + anexo `.zip` |
-| Documento compartilhado (`@meridian-docs-share.com`) — **isca** | **Escassez/urgência** ("expira em 2 horas") |
-| CFO Ricardo Menezes (`@meridiancap`**l**`tal.com.br`) | **BEC / fraude do CEO**: autoridade + urgência + sigilo + **domínio com letra trocada** (l↔i) |
-| Benefícios (`@meridian-beneficios.com`) | **Recompensa/ganho** (PLR liberada 🎉) + prazo + coleta de dados bancários |
+| Suporte TI (`@meridian-ti.example`) | **Domínio sósia** + **pressão** (senha expira em 24h / bloqueio) |
+| Cobrança (`@nf-eletronica.example`) | **Medo/pressão** (protesto em cartório) + anexo `.zip` |
+| Documento compartilhado (`@docs-share.example`) — **isca** | **Escassez/urgência** ("expira em 2 horas") |
+| CFO Ricardo Menezes (`@meridiancap`**l**`tal.example`) | **BEC / fraude do CEO**: autoridade + urgência + sigilo + **domínio com letra trocada** (l↔i) |
+| Benefícios (`@meridian-beneficios.example`) | **Recompensa/ganho** (PLR liberada 🎉) + prazo + coleta de dados bancários |
 
-Os **5 e-mails legítimos** vêm de `@meridiancapital.com.br` (RH, Controladoria,
+Os **5 e-mails legítimos** vêm de `@meridiancapital.example` (RH, Controladoria,
 Research, Facilities, Compliance). Um deles (Compliance) é **legítimo mas com prazo**
 — ensina que *tom urgente não é, sozinho, sinal de golpe*; o que vale é checar o
 **domínio** e o canal.

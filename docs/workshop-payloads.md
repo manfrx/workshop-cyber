@@ -104,11 +104,11 @@ na apresentação são as **técnicas** e os **sinais** que o participante deve 
 ### Os 5 e-mails de phishing e a técnica de cada um
 | E-mail (remetente) | Técnica real |
 |---|---|
-| Suporte TI — `@meridiancapital-ti.com` | **Domínio sósia** + **pressão** (senha expira 24h / bloqueio) |
-| Cobrança — `@nf-eletronica-br.com` | **Medo/pressão** (protesto) + anexo `.zip` |
-| Documento compartilhado — `@meridian-docs-share.com` *(isca)* | **Escassez/urgência** ("expira em 2h") → dispara a simulação |
-| CFO Ricardo Menezes — `@meridiancap`**l**`tal.com.br` | **BEC / fraude do CEO**: autoridade + urgência + sigilo + **letra trocada** (l↔i) |
-| Benefícios — `@meridian-beneficios.com` | **Recompensa** (PLR liberada) + prazo + coleta de dados bancários |
+| Suporte TI — `@meridian-ti.example` | **Domínio sósia** + **pressão** (senha expira 24h / bloqueio) |
+| Cobrança — `@nf-eletronica.example` | **Medo/pressão** (protesto) + anexo `.zip` |
+| Documento compartilhado — `@docs-share.example` *(isca)* | **Escassez/urgência** ("expira em 2h") → dispara a simulação |
+| CFO Ricardo Menezes — `@meridiancap`**l**`tal.example` | **BEC / fraude do CEO**: autoridade + urgência + sigilo + **letra trocada** (l↔i) |
+| Benefícios — `@meridian-beneficios.example` | **Recompensa** (PLR liberada) + prazo + coleta de dados bancários |
 
 ### Os 4 sinais para o gestor levar pra casa
 1. **Domínio trocado/parecido** — letra a mais, letra trocada, ou domínio externo.

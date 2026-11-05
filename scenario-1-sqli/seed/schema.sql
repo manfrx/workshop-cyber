@@ -108,7 +108,7 @@ INSERT INTO patients
   (id, name, cpf, birthdate, gender, blood_type, phone, email, address, insurance, insurance_id)
 VALUES
   (1, 'Ana Beatriz Souza', '472.118.936-55', '1991-04-17', 'Feminino', 'O+',
-   '(11) 98821-4477', 'ana.souza@email.com', 'Rua das Acácias, 128 - São Paulo/SP',
+   '(11) 98821-4477', 'ana.souza@email.example', 'Rua das Acácias, 128 - São Paulo/SP',
    'SaúdePlena', 'SP-0098421-7');
 
 INSERT INTO users (username, password, role, patient_id, fullname) VALUES

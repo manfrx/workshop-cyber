@@ -15,41 +15,41 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const PHISHING_URL = process.env.PHISHING_URL || 'http://127.0.0.1:3003/documento';
 
-const ME = { name: 'Carlos Mendes', addr: 'carlos.mendes@meridiancapital.com.br' };
+const ME = { name: 'Carlos Mendes', addr: 'carlos.mendes@meridiancapital.example' };
 
 // ------------------------------------------------------------------
 // Caixa de entrada (dados estáticos). category: 'legit' | 'phishing'
 // ------------------------------------------------------------------
 const EMAILS = [
   {
-    id: 1, fromName: 'Recursos Humanos', fromAddr: 'rh@meridiancapital.com.br',
+    id: 1, fromName: 'Recursos Humanos', fromAddr: 'rh@meridiancapital.example',
     date: '09:12', subject: 'Campanha de vacinação da gripe — agende seu horário',
     preview: 'A clínica parceira estará no escritório na próxima semana...',
     body: `<p>Olá, time!</p>
       <p>Na próxima semana (3 a 7/11) teremos a <b>campanha de vacinação da gripe</b> aqui no escritório, sem custo para colaboradores.</p>
-      <p>Para se organizar, agende seu horário pela intranet: <a href="https://intranet.meridiancapital.com.br/vacinacao">intranet.meridiancapital.com.br/vacinacao</a></p>
+      <p>Para se organizar, agende seu horário pela intranet: <a href="https://intranet.meridiancapital.example/vacinacao">intranet.meridiancapital.example/vacinacao</a></p>
       <p>Qualquer dúvida, é só responder este e-mail.</p>
       <p>Abraços,<br>Equipe de RH</p>`,
     category: 'legit',
     flags: [
-      'Remetente no domínio oficial da empresa (@meridiancapital.com.br).',
+      'Remetente no domínio oficial da empresa (@meridiancapital.example).',
       'Link aponta para a intranet oficial (mesmo domínio).',
       'Sem urgência artificial, sem pedir senha ou dados sensíveis.',
     ],
     verdict: 'Comunicado interno legítimo: domínio correto, link interno e nenhum pedido suspeito.',
   },
   {
-    id: 2, fromName: 'Suporte de TI', fromAddr: 'suporte@meridiancapital-ti.com',
+    id: 2, fromName: 'Suporte de TI', fromAddr: 'suporte@meridian-ti.example',
     date: '08:47', subject: '[AÇÃO NECESSÁRIA] Sua senha expira em 24 horas',
     preview: 'Detectamos que sua senha corporativa expira em breve...',
     body: `<p>Prezado usuário,</p>
       <p>Detectamos que sua senha corporativa <b>expira em 24 horas</b>. Para evitar o <b>bloqueio imediato</b> da sua conta, confirme suas credenciais agora:</p>
-      <p><a href="http://meridiancapital-ti.com/portal/login">&#9658; Manter minha senha ativa</a></p>
+      <p><a href="http://meridian-ti.example/portal/login">&#9658; Manter minha senha ativa</a></p>
       <p>Caso não confirme, o acesso ao e-mail e aos sistemas será suspenso.</p>
       <p>Atenciosamente,<br>Equipe de Suporte de TI</p>`,
     category: 'phishing',
     flags: [
-      'Domínio do remetente é "meridiancapital-ti.com" — NÃO é o domínio oficial (@meridiancapital.com.br).',
+      'Domínio do remetente é "meridian-ti.example" — NÃO é o domínio oficial (@meridiancapital.example).',
       'Urgência e ameaça ("expira em 24h", "bloqueio imediato") para forçar ação por impulso.',
       'Link leva a um site externo que pede login/senha — clássico roubo de credenciais.',
       'Saudação genérica ("Prezado usuário"), sem seu nome.',
@@ -57,7 +57,7 @@ const EMAILS = [
     verdict: 'Phishing de roubo de credenciais. TI de verdade não pede sua senha por link externo com ameaça de bloqueio.',
   },
   {
-    id: 3, fromName: 'Juliana Alves', fromAddr: 'juliana.alves@meridiancapital.com.br',
+    id: 3, fromName: 'Juliana Alves', fromAddr: 'juliana.alves@meridiancapital.example',
     date: 'Ontem', subject: 'Convite: Reunião trimestral de resultados — 05/11',
     preview: 'Pessoal, segue o convite para nossa reunião trimestral...',
     body: `<p>Oi Carlos,</p>
@@ -73,16 +73,16 @@ const EMAILS = [
     verdict: 'E-mail legítimo de uma colega: contexto natural de trabalho, domínio correto, nada sensível.',
   },
   {
-    id: 4, fromName: 'Cobrança Eletrônica', fromAddr: 'cobranca@nf-eletronica-br.com',
+    id: 4, fromName: 'Cobrança Eletrônica', fromAddr: 'cobranca@nf-eletronica.example',
     date: 'Ontem', subject: 'Nota Fiscal em atraso — regularize para evitar protesto',
     preview: 'Consta em nosso sistema um débito pendente em seu CNPJ...',
     body: `<p>Prezado cliente,</p>
       <p>Consta um <b>débito em atraso</b> vinculado ao seu cadastro. Para evitar <b>protesto em cartório</b> e negativação, baixe o boleto atualizado em anexo e efetue o pagamento hoje.</p>
-      <p>&#128206; <a href="http://nf-eletronica-br.com/boleto/download?id=99183">Boleto_Atualizado.zip</a></p>
+      <p>&#128206; <a href="http://nf-eletronica.example/boleto/download?id=99183">Boleto_Atualizado.zip</a></p>
       <p>Setor de Cobrança</p>`,
     category: 'phishing',
     flags: [
-      'Remetente externo e desconhecido, domínio genérico ("nf-eletronica-br.com").',
+      'Remetente externo e desconhecido, domínio genérico ("nf-eletronica.example").',
       'Ameaça financeira com urgência (protesto, negativação, "pague hoje").',
       'Anexo compactado (.zip) — formato comum para esconder malware.',
       'Não cita dados reais do seu cadastro; é genérico e disparado em massa.',
@@ -90,7 +90,7 @@ const EMAILS = [
     verdict: 'Golpe de boleto/cobrança falsa. Anexo .zip + urgência financeira = clássico vetor de malware.',
   },
   {
-    id: 5, isLure: true, fromName: 'Documentos Compartilhados', fromAddr: 'no-reply@meridian-docs-share.com',
+    id: 5, isLure: true, fromName: 'Documentos Compartilhados', fromAddr: 'no-reply@docs-share.example',
     date: '07:58', subject: 'Carlos, um documento foi compartilhado com você: "Contrato_Confidencial.pdf"',
     preview: 'Um arquivo foi compartilhado com você e expira em 2 horas...',
     body: `<p>Olá, Carlos,</p>
@@ -103,7 +103,7 @@ const EMAILS = [
       <p style="color:#6b7280;font-size:13px">Se o botão não funcionar, acesse: <a href="__PHISHING_URL__">__PHISHING_URL__</a></p>`,
     category: 'phishing',
     flags: [
-      'Domínio de "compartilhamento" falso: "meridian-docs-share.com" não é um serviço oficial.',
+      'Domínio de "compartilhamento" falso: "docs-share.example" não é um serviço oficial.',
       'Urgência artificial ("expira em 2 horas") para você clicar sem pensar.',
       'Remetente não esperado (no-reply) e documento "confidencial" genérico como isca.',
       'O botão baixa um arquivo — é exatamente aqui que um ataque real começa.',
@@ -111,12 +111,12 @@ const EMAILS = [
     verdict: 'ESTA é a isca. Um link de "documento compartilhado" que baixa um arquivo. No mundo real, um clique aqui pode iniciar um ransomware.',
   },
   {
-    id: 6, fromName: 'Meridian Research', fromAddr: 'research@meridiancapital.com.br',
+    id: 6, fromName: 'Meridian Research', fromAddr: 'research@meridiancapital.example',
     date: 'Seg', subject: 'Carta semanal do gestor — visão de mercado',
     preview: 'Nesta edição: juros, câmbio e o que esperar do próximo Copom...',
     body: `<p>Bom dia,</p>
       <p>Na carta desta semana, nossa mesa comenta o cenário de juros, o câmbio e as expectativas para o próximo Copom.</p>
-      <p>Leia a íntegra na área de research: <a href="https://meridiancapital.com.br/research/semanal">meridiancapital.com.br/research/semanal</a></p>
+      <p>Leia a íntegra na área de research: <a href="https://meridiancapital.example/research/semanal">meridiancapital.example/research/semanal</a></p>
       <p>Bons investimentos,<br>Meridian Research</p>`,
     category: 'legit',
     flags: [

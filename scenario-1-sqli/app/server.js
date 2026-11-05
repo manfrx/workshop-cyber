@@ -106,7 +106,7 @@ async function seedIfNeeded() {
       rows.push('(?,?,?,?,?,?,?,?,?,?)');
       params.push(name, randCpf(), randDate(1950, 2005), g, rnd(['A+','A-','B+','O+','O-','AB+']),
         `(11) 9${pad(Math.floor(Math.random()*10000),4)}-${pad(Math.floor(Math.random()*10000),4)}`,
-        `${name.split(' ')[0].toLowerCase()}@email.com`, `Rua ${rnd(LAST)}, ${1+Math.floor(Math.random()*900)} - ${rnd(CITIES)}`,
+        `${name.split(' ')[0].toLowerCase()}@email.example`, `Rua ${rnd(LAST)}, ${1+Math.floor(Math.random()*900)} - ${rnd(CITIES)}`,
         rnd(INS), `${rnd(['SP','RJ','MG'])}-${pad(Math.floor(Math.random()*10000000),7)}-${Math.floor(Math.random()*10)}`);
     }
     await pool.query(
