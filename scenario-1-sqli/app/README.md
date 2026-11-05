@@ -1,67 +1,65 @@
-# Portal MedClinic — código-fonte ausente neste repositório
+# Portal MedClinic · Portal do Paciente (Cenário 1 · SQL Injection)
 
-O código do portal MedClinic **não pôde ser recuperado** do laboratório em
-produção e ainda precisa ser sincronizado aqui.
+Este é o código **real** do cenário, extraído do laboratório em produção
+(`/usr/src/app/server.js` no container MedClinic).
 
-## O que já está pronto
+## O que o app faz
 
-- `../seed/schema.sql` — schema e seed **completos e verificados**
-  (1000 pacientes, 4103 exames, 2 usuários, 1 segredo), extraídos do
-  MySQL 8.0.46 do laboratório (`database medclinic`, usuário `appuser`).
-- `../Dockerfile` — imagem Node 20, espera `app/server.js` na raiz.
+Portal do paciente com uma busca "nos meus exames" que é montada por
+concatenação de string — a falha didática do Cenário 1.
 
-## Por que o código não veio junto
+```js
+// server.js (trecho)
+const sql = `SELECT p.name AS patient, e.exam_date, e.category, e.name AS exam, e.result
+             FROM exams e JOIN patients p ON p.id = e.patient_id
+             WHERE e.patient_id = ${pid} AND e.name LIKE '%${q}%'
+             ORDER BY e.exam_date DESC`;
+```
 
-O app roda em um container separado da imagem oficial, em outra rede Docker
-(`172.18.0.0/16`, contra `172.19.0.0/16` do Cenário 2). Não há:
+A entrada do participante (`q`) é colada direto no comando SQL. O login
+também é vulnerável, o que dá o bypass `admin'#`.
 
-- socket do Docker no container,
-- namespace de PID/montagem do host,
-- permissão `FILE` no MySQL (`LOAD_FILE()` retorna vazio),
-- diretório de arquivos estáticos servido pelo Express.
+A consulta devolve **5 colunas** (`Paciente | Data | Categoria | Exame | Resultado`),
+por isso o `UNION SELECT` precisa ter exatamente 5 colunas.
 
-## Como preencher
+## Seeder
 
-1. Copie o código do portal a partir da VM de gerenciamento do workshop
-   (`/opt/workshop`, populado pelo `up.sh`):
+Na primeira inicialização o app chama `seedIfNeeded()`, que gera **1000
+pacientes** e ~4100 exames (`TOTAL = 1000` no `server.js`). O `seed/schema.sql`
+apenas cria o schema e popula:
 
-   ```bash
-   scp -r <usuario>@<vm-mgmt>:/opt/workshop/scenario-1-sqli/app ./app/
-   ```
+- paciente de demonstração `id = 1` (Ana Beatriz Souza) + 15 exames
+- usuários `user` / `user123` (patient) e `admin` / `S3nh4Admin!2024` (admin)
+- a tabela `secrets` com a flag (`workshop_flag`)
 
-2. Confirme que `app/package.json` define `npm start` (ou `node server.js`)
-   e que o app lê `PORT`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`,
-   `DB_PASSWORD` e `FLAG` do ambiente.
+## Variáveis de ambiente
 
-3. Suba e valide:
+| Variável | Padrão | Uso |
+|----------|--------|-----|
+| `PORT` | `3000` | porta HTTP |
+| `DB_HOST` | `localhost` | host do MySQL |
+| `DB_USER` | `appuser` | usuário do MySQL |
+| `DB_PASSWORD` | `app_pw_change_me` | senha do MySQL |
+| `DB_NAME` | `medclinic` | banco de dados |
 
-   ```bash
-   cd infra && docker compose up -d --build
-   curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/
-   ```
+A flag **não** é lida por este app: ela é gravada pelo `seed/schema.sql`
+(marcador `__C1_FLAG__`), que o Compose substitui por `$C1_FLAG`.
 
-## Contrato observado no laboratório
-
-Para validar a implementação, o app precisa respeitar:
+## Rotas
 
 | Rota | Método | Comportamento |
 |------|--------|----------------|
-| `/login` | GET/POST | Formulário `username` + `password`; sessão via cookie |
+| `/login` | GET/POST | Formulário `username` + `password`; sessão por cookie |
 | `/dashboard` | GET | Painel do paciente logado |
 | `/search?q=` | GET | Busca por exame — **aqui mora a SQLi** |
 | `/logout` | GET | Encerra a sessão |
 
-Login do participante: `user` / `user123` · conta admin: `admin` / `S3nh4Admin!2024`
+## Como subir
 
-A consulta vulnerável (simplificada, conforme o slide "C1 · Código vulnerável"):
-
-```js
-sql = "SELECT data, exame, resultado FROM exames " +
-      "WHERE paciente_id = " + usuario.id +
-      " AND exame LIKE '%" + busca + "%'"   // <- entrada colada no comando
-db.query(sql)
+```bash
+cd infra
+docker compose up -d --build medclinic
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/login
 ```
 
-A busca precisa devolver **5 colunas** (`Paciente | Data | Categoria | Exame | Resultado`)
-para que o `UNION SELECT` de 5 colunas funcione, e a tabela `secrets`
-(nome `workshop_flag`) precisa existir no banco.
+Login do participante: `user` / `user123`.

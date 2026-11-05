@@ -1,0 +1,42 @@
+# Stack do Apache Guacamole (acesso RDP/SSH às VMs pelo navegador).
+# Sobe na VM de gerenciamento. Web em http://<mgmt>:8080/guacamole
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: guac-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: guacamole_db
+      POSTGRES_USER: guacamole
+      POSTGRES_PASSWORD: ${GUAC_DB_PASSWORD:-guacamole_pw}
+    volumes:
+      - guac-db:/var/lib/postgresql/data
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql:ro
+
+  guacd:
+    image: guacamole/guacd:1.5.5
+    container_name: guacd
+    restart: unless-stopped
+    # imagens do Guacamole são só linux/amd64; em mgmt ARM rodam via emulação
+    platform: linux/amd64
+
+  guacamole:
+    image: guacamole/guacamole:1.5.5
+    container_name: guacamole
+    restart: unless-stopped
+    platform: linux/amd64
+    depends_on:
+      - postgres
+      - guacd
+    environment:
+      GUACD_HOSTNAME: guacd
+      POSTGRESQL_HOSTNAME: postgres
+      POSTGRESQL_DATABASE: guacamole_db
+      POSTGRESQL_USER: guacamole
+      POSTGRESQL_PASSWORD: ${GUAC_DB_PASSWORD:-guacamole_pw}
+      POSTGRESQL_AUTO_CREATE_ACCOUNTS: "true"
+    ports:
+      - "8080:8080"
+
+volumes:
+  guac-db:

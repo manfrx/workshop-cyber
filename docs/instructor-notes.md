@@ -11,9 +11,10 @@ e são aplicadas em dois pontos:
 
 | Onde | Marcador | Quem substitui |
 |------|----------|----------------|
-| `scenario-1-sqli/seed/schema.sql` | `__C1_FLAG__` | `infra/docker-compose.yml` (serviço `db`) a partir de `$C1_FLAG` |
-| `scenario-2-cmdi/Dockerfile` | `ARG C2_FLAG` | `docker compose build` a partir de `$C2_FLAG` |
+| `scenario-1-sqli/seed/schema.sql` | `__C1_FLAG__`, `__C1_DB_NAME__` | serviço `db` do Compose, a partir de `$C1_FLAG` e `$C1_DB_NAME` |
+| `scenario-2-cmdi/Dockerfile` | `ARG C2_FLAG` | `docker compose build`, a partir de `$C2_FLAG` |
 | `deck/index.html` (slides de Recap) | `__C1_FLAG__` / `__C2_FLAG__` | manual, antes de apresentar |
+| `docs/workshop-*.md` | `__C1_FLAG__` / `__C2_FLAG__` | manual, antes de distribuir |
 
 Procedimento para a edição:
 
@@ -23,6 +24,11 @@ cp .env.example .env
 # edite .env e defina C1_FLAG=..., C2_FLAG=..., C1_DB_PASSWORD=...
 docker compose up -d --build
 ```
+
+> O serviço `db` monta o seed em `/seed` (somente leitura) e, antes de o
+> MySQL subir, copia os scripts para o diretório de init do container já
+> com os marcadores substituídos. O arquivo do repositório **nunca** é
+> alterado e a flag **nunca** é hardcoded.
 
 Para o deck, substitua os marcadores pelos valores da edição antes de projetar:
 
@@ -40,13 +46,14 @@ sed -i "s|__C1_FLAG__|$C1_FLAG|g; s|__C2_FLAG__|$C2_FLAG|g" deck/index.html
 
 - [ ] VMs da OCI ligadas e com IP público anotado
 - [ ] `infra/.env` preenchido com as flags da edição atual
+- [ ] `infra/oci/config.env` preenchido (compartimento, senhas, `ADMIN_CIDR`)
 - [ ] `docker compose up -d --build` rodando em todas as VMs
-- [ ] `curl` retornando `200` nos três endpoints (3000, 3001, 3002)
+- [ ] `curl` retornando `200` nos endpoints (3000, 3001, 3002, 3005)
 - [ ] Deck aberto em `deck/index.html` em um navegador de teste
-- [ ] Script `simulacao-tela-cheia.ps1` testado em máquina isolada
-- [ ] Plataforma de placar acessível e testada
+- [ ] Script `simulation/simulacao-tela-cheia.ps1` testado em máquina isolada
+- [ ] Plataforma acessível e placar testado (porta 3005)
 - [ ] `docs/participant-guide.pdf` impresso ou enviado aos participantes
-- [ ] Security List da OCI liberando 3000, 3001, 3002 (e 10000 se usar a simulação)
+- [ ] Security List da OCI liberando 3000, 3001, 3002, 3005 (e 10000 se usar a simulação)
 - [ ] Firewall interno das VMs (`iptables`/`firewalld`) revisado
 
 ---

@@ -8,6 +8,11 @@ secrets.local.*
 .env
 .env.*
 !.env.example
+infra/oci/config.env
+
+# ==== Infra OCI (estado local de deploy) ====
+infra/oci/.state/
+infra/oci/*.rendered.*
 
 # ==== Dependências ====
 node_modules/

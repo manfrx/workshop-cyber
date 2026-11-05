@@ -1,0 +1,13 @@
+{
+  "name": "workshop-platform",
+  "version": "1.0.0",
+  "description": "Plataforma do workshop: auth, webmail (quest de phishing), submissão de flags e placar",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-session": "^1.18.0"
+  }
+}

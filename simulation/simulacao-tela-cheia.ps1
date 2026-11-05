@@ -20,9 +20,8 @@
 param(
     [int]$Port = 10000,
     [string]$TriggerPath = "/hack",
+    [string]$ReturnPath = "/voltar",
     [string]$ImagePath = "",
-    [switch]$Once,
-    [switch]$Agora,
     [string]$PreviewPath = "",
     [double]$PreviewTime = 10.5
 )
@@ -916,6 +915,7 @@ function Dispose-Assets {
 #  Tela cheia
 # =====================================================================
 function Show-Hacked {
+    if ($script:AttackForm) { return }   # ja esta na tela (evita empilhar janelas)
     $form = [AtkForm]::new()
     $script:AttackForm = $form
 
@@ -928,7 +928,7 @@ function Show-Hacked {
     $form.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::None
     $form.Text = 'Sistema'
 
-    $form.Add_KeyDown({ if ($_.KeyCode -eq [System.Windows.Forms.Keys]::Escape) { $script:AttackForm.Close() } })
+    # ESC NAO fecha a tela de proposito: a simulacao so e revertida pelo /voltar (painel).
 
     $form.Add_Paint({
         param($sender, $e)
@@ -937,28 +937,26 @@ function Show-Hacked {
         Render-Frame $e.Graphics $t $sender.ClientSize.Width $sender.ClientSize.Height
     })
 
-    $script:PaintTimer = [System.Windows.Forms.Timer]::new()
-    $script:PaintTimer.Interval = 33
-    $script:PaintTimer.Add_Tick({ if ($script:AttackForm) { $script:AttackForm.Invalidate() } })
-
+    # SEM PaintTimer: o repaint e disparado pelo loop principal (um frame por volta),
+    # intercalado com a checagem da porta 10000. Assim o render pesado NAO trava o HTTP
+    # (um timer de 33ms inundaria o DoEvents e mataria o listener enquanto a tela estivesse aberta).
     $form.Add_Shown({
         $script:StartClock = [System.Diagnostics.Stopwatch]::StartNew()
         $script:AttackForm.Activate()
         [System.Windows.Forms.Cursor]::Hide()
-        $script:PaintTimer.Start()
         [System.Media.SystemSounds]::Hand.Play()
     })
 
     $form.Add_FormClosed({
-        if ($script:PaintTimer) { $script:PaintTimer.Stop() }
         [System.Windows.Forms.Cursor]::Show()
+        $script:AttackForm = $null
     })
 
-    [void]$form.ShowDialog()
+    $form.Show()   # nao-modal: o loop principal continua atendendo HTTP (/voltar, /status)
+}
 
-    $script:PaintTimer.Dispose()
-    $form.Dispose()
-    $script:AttackForm = $null
+function Close-Hacked {
+    if ($script:AttackForm) { $script:AttackForm.Close() }   # Close dispara o FormClosed (limpeza)
 }
 
 # =====================================================================
@@ -999,80 +997,81 @@ $okPage = @'
 
 $notFoundPage = '<!doctype html><html><body style="background:#0A0A0B;color:#8C8F96;font-family:Consolas,monospace;padding:40px">404 - not found</body></html>'
 
-if ($Agora) {
-    Show-Hacked
-    if ($Once) { return }
-}
+# ---------------------------------------------------------------------------
+#  Pagina de resposta do /voltar
+# ---------------------------------------------------------------------------
+$backPage = '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Tela liberada</title></head><body style="background:#0A0A0B;color:#B6FF3B;font-family:Consolas,monospace;padding:40px">// TELA LIBERADA - simulacao revertida.</body></html>'
 
+# ---------------------------------------------------------------------------
+#  Servidor HTTP (nao-bloqueante): /hack mostra, /voltar fecha, /status consulta.
+#  A exibicao e nao-modal, entao o loop segue atendendo requisicoes com a tela aberta.
+# ---------------------------------------------------------------------------
 $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Any, $Port)
 try { $listener.Start() }
 catch {
     Write-Host "[-] Nao foi possivel abrir a porta $Port. Ja existe outro processo usando?" -ForegroundColor Red
-    Write-Host "    Feche a outra janela do script (ou rode com -Port 10001) e tente de novo." -ForegroundColor Yellow
     return
 }
 
 Write-Host ''
-Write-Host "[*] Servidor no ar. A tela cheia NAO abre sozinha: ela aparece quando chegar o disparo." -ForegroundColor Cyan
-Write-Host "    Neste PC ....... http://localhost:$Port$TriggerPath" -ForegroundColor Cyan
-$lanIps = @()
-try {
-    $lanIps = Get-NetIPConfiguration -ErrorAction Stop |
-        Where-Object { $_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.Status -eq 'Up' } |
-        ForEach-Object { $_.IPv4Address.IPAddress } |
-        Where-Object { $_ } |
-        Select-Object -Unique
-} catch { }
-if (-not $lanIps) {
-    try {
-        $lanIps = [System.Net.Dns]::GetHostAddresses([System.Net.Dns]::GetHostName()) |
-            Where-Object { $_.AddressFamily -eq 'InterNetwork' -and $_.ToString() -ne '127.0.0.1' } |
-            ForEach-Object { $_.ToString() } |
-            Select-Object -Unique
-    } catch { }
-}
-foreach ($ip in $lanIps) { Write-Host "    Na rede/celular  http://${ip}:$Port$TriggerPath" -ForegroundColor Cyan }
-if (-not $lanIps) { Write-Host "    Na rede ........ http://<este-IP>:$Port$TriggerPath" -ForegroundColor Cyan }
-Write-Host "    Para ver a tela agora, rode com -Agora." -ForegroundColor DarkGray
+Write-Host "[*] Servidor no ar na porta $Port." -ForegroundColor Cyan
+Write-Host "    Disparo: $TriggerPath  |  Voltar: $ReturnPath  |  Status: /status" -ForegroundColor Cyan
 Write-Host "    ESC fecha a tela  |  Ctrl+C encerra o servidor" -ForegroundColor DarkGray
 Write-Host ''
 
 try {
     while ($true) {
-        $client = $listener.AcceptTcpClient()
-        $trigger = $false
-        try {
-            $stream = $client.GetStream()
-            $reader = [System.IO.StreamReader]::new($stream)
-            $requestLine = $reader.ReadLine()
-            while (($h = $reader.ReadLine()) -ne $null -and $h -ne '') { }
+        if ($listener.Pending()) {
+            $client = $listener.AcceptTcpClient()
+            $client.ReceiveTimeout = 2000
+            $action = $null
+            try {
+                $stream = $client.GetStream()
+                $reader = [System.IO.StreamReader]::new($stream)
+                $requestLine = $reader.ReadLine()
+                while (($h = $reader.ReadLine()) -ne $null -and $h -ne '') { }
 
-            $remote = $client.Client.RemoteEndPoint
-            if ($requestLine -match '^GET\s+(\S+)') {
-                $path = $Matches[1].Split('?')[0]
-                if ($path -eq $TriggerPath) {
-                    Send-Response $stream 200 $okPage
-                    Write-Host "[+] $(Get-Date -Format HH:mm:ss) Disparo recebido de $remote" -ForegroundColor Green
-                    $trigger = $true
-                } else {
-                    Send-Response $stream 404 $notFoundPage
+                $remote = $client.Client.RemoteEndPoint
+                if ($requestLine -match '^GET\s+(\S+)') {
+                    $path = $Matches[1].Split('?')[0]
+                    if ($path -eq $TriggerPath) {
+                        Send-Response $stream 200 $okPage
+                        Write-Host "[+] $(Get-Date -Format HH:mm:ss) Disparo recebido de $remote" -ForegroundColor Green
+                        $action = 'show'
+                    }
+                    elseif ($path -eq $ReturnPath) {
+                        Send-Response $stream 200 $backPage
+                        Write-Host "[+] $(Get-Date -Format HH:mm:ss) Retorno recebido de $remote" -ForegroundColor Green
+                        $action = 'close'
+                    }
+                    elseif ($path -eq '/status') {
+                        $locked = if ($null -ne $script:AttackForm) { 'true' } else { 'false' }
+                        Send-Response $stream 200 "{""locked"":$locked}"
+                    }
+                    else {
+                        Send-Response $stream 404 $notFoundPage
+                    }
                 }
             }
-        }
-        catch {
-            Write-Host "[-] Erro na requisicao: $_" -ForegroundColor Yellow
-        }
-        finally {
-            $client.Close()
+            catch {
+                Write-Host "[-] Erro na requisicao: $_" -ForegroundColor Yellow
+            }
+            finally {
+                $client.Close()
+            }
+
+            if ($action -eq 'show')  { Show-Hacked }
+            if ($action -eq 'close') { Close-Hacked }
         }
 
-        if ($trigger) {
-            Show-Hacked
-            if ($Once) { break }
-        }
+        if ($script:AttackForm) { try { $script:AttackForm.Invalidate() } catch {} }  # 1 frame da tela cheia por volta
+        [System.Windows.Forms.Application]::DoEvents()   # processa esse repaint + input, e RETORNA
+        Start-Sleep -Milliseconds 33                      # ~30fps; mantem a porta 10000 responsiva
     }
 }
 finally {
+    Close-Hacked
+    [System.Windows.Forms.Application]::DoEvents()
     $listener.Stop()
     Dispose-Assets
     Write-Host '[*] Listener encerrado.' -ForegroundColor Cyan

@@ -1,14 +1,30 @@
 version: "3.9"
 
+# =====================================================================
+#  Workshop "Do Conhecimento à Ação" — stack completa
+#
+#  Rodar:  cd infra && cp .env.example .env && docker compose up -d --build
+#
+#  Portas públicas (ver .env.example):
+#    3000 MedClinic   (Cenário 1 · SQL Injection)
+#    3001 Meridian    (Cenário 2 · Command Injection)
+#    3002 Webmail     (Cenário 3 · caixa de e-mail fictícia)
+#    3003 Controle    (Cenário 3 · página-isca + overlay)
+#    3005 Plataforma  (placar, quest de phishing e submissão de flags)
+# =====================================================================
+
 services:
+  # ---------------------------------------------------------------
+  #  Cenário 1 · MySQL
+  #  O seed é montado somente-leitura em /seed. Antes de o MySQL subir,
+  #  copiamos os scripts para o diretório de init do container substituindo
+  #  os marcadores __C1_FLAG__ e __C1_DB_NAME__ pelos valores do ambiente.
+  #  Assim a flag NUNCA é hardcoded no repositório e o seed original
+  #  permanece intacto no disco.
+  # ---------------------------------------------------------------
   db:
     image: mysql:8
     restart: unless-stopped
-    # O seed fica montado somente-leitura em /seed. Antes de o MySQL subir,
-    # copiamos os scripts para o diretório de init do container substituindo
-    # o marcador __C1_FLAG__ pelo valor de C1_FLAG (definido em infra/.env).
-    # Assim a flag NUNCA é hardcoded no repositório e o seed original
-    # permanece intacto no disco.
     entrypoint:
       - /bin/sh
       - -c
@@ -17,11 +33,13 @@ services:
         mkdir -p /docker-entrypoint-initdb.d
         FLAGVAL="$${C1_FLAG}"
         [ -n "$$FLAGVAL" ] || FLAGVAL='FLAG{PLACEHOLDER_C1}'
+        DBNAME="$${C1_DB_NAME}"
+        [ -n "$$DBNAME" ] || DBNAME='medclinic'
         for f in /seed/*; do
           [ -f "$$f" ] || continue
           base=$$(basename "$$f")
           case "$$base" in
-            *.sql) sed "s|__C1_FLAG__|$$FLAGVAL|g" "$$f" > "/docker-entrypoint-initdb.d/$$base" ;;
+            *.sql) sed -e "s|__C1_FLAG__|$$FLAGVAL|g" -e "s|__C1_DB_NAME__|$$DBNAME|g" "$$f" > "/docker-entrypoint-initdb.d/$$base" ;;
             *)     cp "$$f" "/docker-entrypoint-initdb.d/$$base" ;;
           esac
         done
@@ -32,6 +50,7 @@ services:
       MYSQL_USER: ${C1_DB_USER}
       MYSQL_PASSWORD: ${C1_DB_PASSWORD}
       C1_FLAG: ${C1_FLAG}
+      C1_DB_NAME: ${C1_DB_NAME}
     volumes:
       - ./../scenario-1-sqli/seed:/seed:ro
       - dbdata:/var/lib/mysql
@@ -41,6 +60,10 @@ services:
       timeout: 5s
       retries: 10
 
+  # ---------------------------------------------------------------
+  #  Cenário 1 · MedClinic (SQL Injection)
+  #  O app semeia ~1000 pacientes e ~4100 exames na primeira subida.
+  # ---------------------------------------------------------------
   medclinic:
     build: ../scenario-1-sqli
     restart: unless-stopped
@@ -48,36 +71,82 @@ services:
       - "${C1_PORT}:3000"
     environment:
       DB_HOST: db
-      DB_PORT: ${C1_DB_PORT}
-      DB_NAME: ${C1_DB_NAME}
+      DB_PORT: 3306
       DB_USER: ${C1_DB_USER}
       DB_PASSWORD: ${C1_DB_PASSWORD}
-      FLAG: ${C1_FLAG}
+      DB_NAME: ${C1_DB_NAME}
+      PORT: 3000
     depends_on:
       db:
         condition: service_healthy
 
+  # ---------------------------------------------------------------
+  #  Cenário 2 · Meridian (Command Injection)
+  #  O container escuta em 3000 (PORT=3000 no server.js); a porta
+  #  pública do cenário é C2_PORT (3001).
+  #  A flag é gravada em /root/flag.txt durante o BUILD.
+  # ---------------------------------------------------------------
   meridian:
     build:
       context: ../scenario-2-cmdi
       args:
-        # A flag é gravada em /root/flag.txt durante o BUILD (veja o Dockerfile).
         C2_FLAG: ${C2_FLAG}
     restart: unless-stopped
     ports:
-      # O container escuta em 3000 (PORT=3000 no server.js). A porta pública
-      # do cenário é C2_PORT (3001).
       - "${C2_PORT}:3000"
     environment:
       PORT: 3000
 
+  # ---------------------------------------------------------------
+  #  Cenário 3 · Webmail fictício (quest de phishing)
+  # ---------------------------------------------------------------
   webmail:
     build: ../phishing/webmail
     restart: unless-stopped
     ports:
       - "${C3_PORT}:3002"
     environment:
-      SECRET: ${C3_WEBMAIL_SECRET}
+      PORT: 3000
+      PHISHING_URL: ${PHISHING_URL}
+
+  # ---------------------------------------------------------------
+  #  Cenário 3 · Controle (página-isca, overlay e disparo nas VMs)
+  # ---------------------------------------------------------------
+  control:
+    build: ../phishing/control
+    restart: unless-stopped
+    ports:
+      - "${C3_CONTROL_PORT}:3003"
+    environment:
+      PORT: 3000
+      HACK_URL: ${HACK_URL}
+      HACK_DELAY_MS: ${HACK_DELAY_MS}
+
+  # ---------------------------------------------------------------
+  #  Plataforma · placar, quest de phishing e submissão de flags
+  #  Usa a rede do host para alcançar as VMs de participante (porta
+  #  SIM_PORT) no disparo de /hack e /voltar.
+  # ---------------------------------------------------------------
+  platform:
+    build: ../platform
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      PORT: ${PLATFORM_PORT}
+      DB_FILE: /data/db.json
+      SESSION_SECRET: ${SESSION_SECRET}
+      ADMIN_KEY: ${ADMIN_KEY}
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_PASS: ${ADMIN_PASS}
+      PARTICIPANT_IPS: ${PARTICIPANT_IPS}
+      SIM_PORT: ${SIM_PORT}
+      PHISHING_URL: ${PHISHING_URL}
+      # Flags que a plataforma aceita no placar (validacao das submissoes).
+      C1_FLAG: ${C1_FLAG}
+      C2_FLAG: ${C2_FLAG}
+    volumes:
+      - platform-data:/data
 
 volumes:
   dbdata:
+  platform-data:

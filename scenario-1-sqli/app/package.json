@@ -1,0 +1,14 @@
+{
+  "name": "medclinic-sqli",
+  "version": "1.0.0",
+  "description": "Cenário didático de SQL Injection - portal de clínica médica",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "mysql2": "^3.11.0"
+  }
+}

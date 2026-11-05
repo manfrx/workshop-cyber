@@ -25,28 +25,35 @@ Tudo é fictício — empresas, pacientes, clientes, domínios. Os domínios nos
 
 ```text
 cyber-workshop/
-├── README.md                    # este arquivo
+├── README.md
 ├── LICENSE                      # MIT + cláusula de uso ético
 ├── .gitignore
 ├── docs/
-│   ├── participant-guide.pdf    # guia do participante
-│   └── instructor-notes.md      # notas do instrutor (sem flags)
+│   ├── participant-guide.pdf    # guia do participante (PDF do dia do evento)
+│   ├── participant-guide.md     # mesmo conteúdo em Markdown
+│   ├── instructor-notes.md      # notas do instrutor (sem flags)
+│   ├── workshop-passo-a-passo.md
+│   ├── workshop-payloads.md
+│   └── workshop-resumo-tecnico.md
 ├── deck/
 │   └── index.html               # apresentação (abre no navegador)
 ├── scenario-1-sqli/
 │   ├── app/                     # portal MedClinic
 │   └── seed/
-│       └── schema.sql           # schema + dados fictícios
+│       └── schema.sql           # schema + paciente de demonstração
 ├── scenario-2-cmdi/
 │   ├── app/                     # portal Meridian
 │   └── Dockerfile
 ├── phishing/
-│   └── webmail/                 # caixa de e-mail fictícia
+│   ├── webmail/                 # caixa de e-mail fictícia
+│   └── control/                 # página-isca + overlay de bloqueio
+├── platform/                    # placar, quest de phishing e submissão de flags
 ├── simulation/
 │   └── simulacao-tela-cheia.ps1 # tela cheia de “sistema comprometido”
 └── infra/
-    ├── docker-compose.yml
-    └── .env.example             # placeholders — nunca valores reais
+    ├── docker-compose.yml       # stack completa do laboratório
+    ├── .env.example             # placeholders — nunca valores reais
+    └── oci/                     # provisionamento do laboratório na OCI
 ```
 
 ---
@@ -54,9 +61,10 @@ cyber-workshop/
 ## Pré-requisitos
 
 - **Docker** e **Docker Compose** (recomendado para o lab inteiro)
-- **Node.js 20+** ou **Python 3.11+** (caso rode os apps fora do Docker)
+- **Node.js 20+** (caso rode os apps fora do Docker)
 - **MySQL 8** (ou usar o container do `docker-compose`)
 - **PowerShell 7+** no Windows, apenas para o script de simulação
+- Para o laboratório na nuvem: **OCI CLI** configurada
 
 ---
 
@@ -75,8 +83,8 @@ As flags não estão no repositório. Elas são injetadas via variáveis de ambi
 
 | Variável | Onde entra |
 |----------|------------|
-| `C1_FLAG` | `secrets.flag` no MySQL (via marcador `__C1_FLAG__` no seed) |
-| `C2_FLAG` | `/root/flag.txt` no container Meridian (via `ARG C2_FLAG` no build) |
+| `C1_FLAG` | `secrets.flag` no MySQL (via marcador `__C1_FLAG__` no seed) **e** validação no placar |
+| `C2_FLAG` | `/root/flag.txt` no container Meridian (via `ARG C2_FLAG` no build) **e** validação no placar |
 | `C1_DB_PASSWORD` | MySQL do Cenário 1 |
 
 O deck (`deck/index.html`) usa os mesmos marcadores nos slides de Recap. Substitua-os na máquina de apresentação:
@@ -84,12 +92,6 @@ O deck (`deck/index.html`) usa os mesmos marcadores nos slides de Recap. Substit
 ```bash
 sed -i "s|__C1_FLAG__|$C1_FLAG|g; s|__C2_FLAG__|$C2_FLAG|g" deck/index.html
 ```
-
-> **Estado dos cenários:** o Cenário 2 (`scenario-2-cmdi/`) está completo e
-> verificado. No Cenário 1, o **seed** está completo (1000 pacientes, 4103
-> exames, 2 usuários), mas o **código do portal** ainda não foi sincronizado
-> neste repositório — ver `scenario-1-sqli/app/README.md`.
-
 
 ### 2. Suba os cenários com Docker Compose
 
@@ -101,22 +103,45 @@ docker compose ps
 
 Serviços esperados:
 
-| Serviço | Porta | URL local |
-|---------|-------|-----------|
-| MedClinic (Cenário 1) | 3000 | http://localhost:3000/ |
-| Meridian (Cenário 2) | 3001 | http://localhost:3001/ |
-| Webmail (Cenário 3) | 3002 | http://localhost:3002/ |
-| MySQL (Cenário 1) | 3306 | — (interno) |
+| Serviço | Porta | URL local | Papel |
+|---------|-------|-----------|-------|
+| MedClinic | 3000 | http://localhost:3000/ | Cenário 1 · SQL Injection |
+| Meridian | 3001 | http://localhost:3001/ | Cenário 2 · Command Injection |
+| Webmail | 3002 | http://localhost:3002/ | Cenário 3 · caixa de e-mail |
+| Controle | 3003 | http://localhost:3003/ | Cenário 3 · página-isca + overlay |
+| Plataforma | 3005 | http://localhost:3005/ | placar, quest e submissão de flags |
+| MySQL | — | interno | banco do Cenário 1 |
 
 ### 3. Verifique a saúde dos serviços
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3001/
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3002/
+for p in 3000 3001 3002 3003 3005; do
+  printf "%s -> " "$p"
+  curl -s -o /dev/null -w "%{http_code}\n" "http://localhost:$p/"
+done
 ```
 
-Os três devem responder 200.
+Os cinco devem responder `200` (o `3003` pode responder `404` na raiz — use `/documento`).
+
+### 4. Provisionamento na OCI
+
+O laboratório em nuvem (VM de gerenciamento + VMs Windows de participante) é
+provisionado por `infra/oci/`:
+
+```bash
+cd infra/oci
+cp config.env.example config.env   # ajuste COMPARTMENT_OCID, senhas e ADMIN_CIDR
+./up.sh
+```
+
+| Script | Função |
+|--------|--------|
+| `up.sh` | Cria a VCN, a VM de gerenciamento e as VMs de participante |
+| `up-tls.sh` | Igual ao `up.sh`, com TLS (certificado self-signed ou Let's Encrypt) |
+| `configure-mgmt.sh` | Instala Docker, nginx, Guacamole e sobe os containers |
+| `down.sh` | Derruba tudo usando a tag `workshop=cyber-ctf` |
+
+---
 
 ## Como rodar cada parte
 
@@ -144,9 +169,9 @@ curl http://<IP-da-máquina>:10000/hack
 Cenário 1 (SQLi):
 
 ```bash
-cd scenario-1-sqli
-npm install        # ou: pip install -r requirements.txt
-npm start          # ou: python app.py
+cd scenario-1-sqli/app
+npm install
+PORT=3000 DB_HOST=127.0.0.1 DB_USER=appuser DB_PASSWORD=app_pw_change_me DB_NAME=medclinic npm start
 ```
 
 Cenário 2 (CMDi):
@@ -154,17 +179,22 @@ Cenário 2 (CMDi):
 ```bash
 cd scenario-2-cmdi
 docker build -t meridian .
-docker run -p 3001:3001 meridian
+docker run -p 3001:3000 meridian
 ```
+
+---
 
 ## Credenciais de demonstração
 
 | Cenário | Usuário | Senha |
 |---------|---------|-------|
 | MedClinic | `user` | `user123` |
+| MedClinic (admin) | `admin` | `S3nh4Admin!2024` |
 | Meridian | `investidor` | `Invest@2024` |
 
 Essas credenciais são apenas para o lab. Nunca reutilize em sistemas reais.
+
+---
 
 ## Para instrutores
 
@@ -175,7 +205,9 @@ Consulte `docs/instructor-notes.md` para:
 - Dicas de condução por cenário
 - Como resetar o lab entre sessões
 
-As flags e o gabarito ficam em um repositório privado separado — nunca neste.
+Os documentos originais do workshop estão em `docs/workshop-*.md` (com as
+flags substituídas por marcadores). As flags e o gabarito ficam em um
+repositório privado separado — nunca neste.
 
 ## Como contribuir
 

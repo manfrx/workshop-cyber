@@ -1,0 +1,12 @@
+{
+  "name": "meridian-webmail",
+  "version": "1.0.0",
+  "description": "Webmail de treinamento - quest de identificação de phishing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

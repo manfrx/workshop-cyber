@@ -1,0 +1,12 @@
+# nginx como reverse proxy TLS na VM de gerenciamento (usado só pelo up-tls.sh).
+# network_mode: host -> enxerga a plataforma (127.0.0.1:3005) e o Guacamole
+# (127.0.0.1:8080) que rodam na própria mgmt, e publica 80/443.
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: wk-nginx
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro

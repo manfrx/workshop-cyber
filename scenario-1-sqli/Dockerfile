@@ -2,10 +2,11 @@
 #  Cenário 1 · MedClinic — Portal do Paciente
 #  (SQL Injection)
 #
-#  ATENÇÃO: o código do portal (app/) ainda NÃO está neste repositório.
-#  Ver app/README.md. O seed em ../seed está completo e verificado.
+#  O seed vive em ../seed e e montado no container do MySQL.
+#  O app usa as variaveis DB_HOST / DB_USER / DB_PASSWORD / DB_NAME / PORT.
+#  A flag NAO vem por aqui: ela e injetada pelo seed a partir de C1_FLAG.
 # =====================================================================
-FROM node:20-slim
+FROM node:20-alpine
 
 WORKDIR /usr/src/app
 COPY app/package.json ./

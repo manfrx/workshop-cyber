@@ -1,0 +1,24 @@
+#cloud-config
+# VM de gerenciamento (Linux): Docker + Compose v2. O up.sh envia o repositório
+# e sobe os containers (platform, challenges, Guacamole, nginx) depois.
+package_update: true
+packages:
+  - git
+  - curl
+  - ca-certificates
+  - iptables-persistent
+
+runcmd:
+  # Docker + plugin compose (instalador oficial — garante `docker compose`)
+  - curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+  - sh /tmp/get-docker.sh
+  - systemctl enable --now docker
+  - usermod -aG docker ubuntu || true
+  # libera as portas de entrada web (o resto fica interno)
+  - iptables -I INPUT 5 -p tcp --dport 80 -j ACCEPT
+  - iptables -I INPUT 6 -p tcp --dport 443 -j ACCEPT
+  - iptables -I INPUT 7 -p tcp --dport 8080 -j ACCEPT
+  - netfilter-persistent save
+  - mkdir -p /opt/workshop
+  - chown ubuntu:ubuntu /opt/workshop
+  - echo "mgmt-ready" > /var/log/wkcyber-ready
