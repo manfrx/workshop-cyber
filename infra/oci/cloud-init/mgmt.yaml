@@ -19,6 +19,11 @@ runcmd:
   - iptables -I INPUT 5 -p tcp --dport 80 -j ACCEPT
   - iptables -I INPUT 6 -p tcp --dport 443 -j ACCEPT
   - iptables -I INPUT 7 -p tcp --dport 8080 -j ACCEPT
+  # Portas dos cenarios e da plataforma: o nginx (network_mode: host) escuta
+  # 3000 (MedClinic), 3001 (Meridian) e 3003 (control), e a plataforma roda
+  # direto na 3005. Sem isso a INPUT rejeita tudo que nao for 22/80/443/8080
+  # (a imagem Ubuntu da Oracle fecha o resto).
+  - iptables -I INPUT 8 -p tcp --dport 3000:3005 -j ACCEPT
   - netfilter-persistent save
   - mkdir -p /opt/workshop
   - chown ubuntu:ubuntu /opt/workshop
