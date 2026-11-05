@@ -1,0 +1,13 @@
+{
+  "name": "meridian-cmdi",
+  "version": "1.0.0",
+  "description": "Cenário didático de Command Injection - console interno de gestora de investimentos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-session": "^1.18.0"
+  }
+}

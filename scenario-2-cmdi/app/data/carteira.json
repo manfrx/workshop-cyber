@@ -1,0 +1,116 @@
+{
+  "investidor": "Carlos Mendes",
+  "atualizado_em": "2026-11-04T22:57:30.536Z",
+  "patrimonio": 1284530,
+  "saldo": 79730,
+  "posicoes": [
+    {
+      "ativo": "PETR4",
+      "nome": "Petrobras PN",
+      "tipo": "Ação",
+      "qtd": 2000,
+      "pm": 28.4,
+      "atual": 38.72,
+      "valor": 77440
+    },
+    {
+      "ativo": "VALE3",
+      "nome": "Vale ON",
+      "tipo": "Ação",
+      "qtd": 1500,
+      "pm": 61.2,
+      "atual": 58.9,
+      "valor": 88350
+    },
+    {
+      "ativo": "ITUB4",
+      "nome": "Itaú Unibanco PN",
+      "tipo": "Ação",
+      "qtd": 3000,
+      "pm": 24.1,
+      "atual": 33.45,
+      "valor": 100350.00000000001
+    },
+    {
+      "ativo": "BBAS3",
+      "nome": "Banco do Brasil ON",
+      "tipo": "Ação",
+      "qtd": 2500,
+      "pm": 45,
+      "atual": 52.8,
+      "valor": 132000
+    },
+    {
+      "ativo": "WEGE3",
+      "nome": "WEG ON",
+      "tipo": "Ação",
+      "qtd": 1200,
+      "pm": 36.5,
+      "atual": 41.2,
+      "valor": 49440
+    },
+    {
+      "ativo": "HGLG11",
+      "nome": "CSHG Logística FII",
+      "tipo": "FII",
+      "qtd": 400,
+      "pm": 158,
+      "atual": 162.3,
+      "valor": 64920.00000000001
+    },
+    {
+      "ativo": "MXRF11",
+      "nome": "Maxi Renda FII",
+      "tipo": "FII",
+      "qtd": 5000,
+      "pm": 9.8,
+      "atual": 10.15,
+      "valor": 50750
+    },
+    {
+      "ativo": "KNRI11",
+      "nome": "Kinea Renda Imob. FII",
+      "tipo": "FII",
+      "qtd": 300,
+      "pm": 142,
+      "atual": 139.5,
+      "valor": 41850
+    },
+    {
+      "ativo": "TD-SELIC",
+      "nome": "Tesouro Selic 2029",
+      "tipo": "Renda Fixa",
+      "qtd": 1,
+      "pm": 200000,
+      "atual": 210000,
+      "valor": 210000
+    },
+    {
+      "ativo": "CDB-110",
+      "nome": "CDB 110% CDI",
+      "tipo": "Renda Fixa",
+      "qtd": 1,
+      "pm": 150000,
+      "atual": 158300,
+      "valor": 158300
+    },
+    {
+      "ativo": "MER-MM",
+      "nome": "Meridian FIC Multimercado",
+      "tipo": "Fundo",
+      "qtd": 1,
+      "pm": 90000,
+      "atual": 112400,
+      "valor": 112400
+    },
+    {
+      "ativo": "BTC",
+      "nome": "Bitcoin",
+      "tipo": "Cripto",
+      "qtd": 0.35,
+      "pm": 210000,
+      "atual": 340000,
+      "valor": 118999.99999999999
+    }
+  ]
+}

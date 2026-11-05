@@ -1,0 +1,42 @@
+MIT License with Ethical Use Addendum
+
+Copyright (c) 2026 <seu nome / organização>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+ETHICAL USE ADDENDUM
+
+This Software contains applications that are intentionally insecure and
+designed for security training purposes only. By using this Software, you
+agree that:
+
+1. You will use this Software only in isolated, controlled environments
+   that you own or have explicit written authorization to test.
+
+2. You will not deploy, apply, or adapt any technique described or
+   implemented in this Software against any system, network, or service
+   without prior written authorization from the system owner.
+
+3. You acknowledge that unauthorized access to computer systems is a
+   criminal offense in Brazil under Lei 12.737/2012 and in many other
+   jurisdictions, and that the authors of this Software disclaim any
+   responsibility for misuse.
+
+4. You will not remove or alter this addendum, nor the ethical warnings
+   present in the README.md and documentation.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

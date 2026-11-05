@@ -1,0 +1,917 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Do conhecimento à ação</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: 1920×1080 stage scaled to the window; one idea per slide; Root identity (dark, acid accent, amber for alerts). Single dark look by design. */
+:root{
+  --ink:#0A0A0B; --ink2:#16181C; --line:#2A2E35; --bone:#EDE6D6; --body:#C9C3B5; --mute:#8C8F96;
+  --acid:#B6FF3B; --amber:#FFB020;
+  --display:'Chakra Petch', 'Arial Narrow', Arial, sans-serif;
+  --mono:'JetBrains Mono', 'Courier New', monospace;
+  --ease:cubic-bezier(.7,0,.2,1);
+  color-scheme:dark;
+}
+html,body{height:100%}
+h1,h2,h3,p,pre,table{margin:0}
+body{background:var(--ink);color:var(--bone);font-family:var(--mono);overflow:hidden}
+.viewport{position:fixed;inset:0;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:12px;display:grid;place-items:center;background:var(--ink)}
+.stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--ink);outline:none}
+
+/* ---------- slides + transition: push with depth ---------- */
+.slide{position:absolute;inset:0;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px;background:var(--ink);visibility:hidden;will-change:transform,filter}
+.slide.alt{background:var(--ink2)}
+.slide.active,.slide.at-right,.slide.at-back{visibility:visible}
+.slide.at-right{transform:translateX(100%)}
+.slide.at-back{transform:translateX(-18%) scale(.94);filter:brightness(.32)}
+.slide.anim{transition:transform .85s var(--ease), filter .85s var(--ease)}
+.slide > :not(.waves):not(.abs){position:relative;z-index:1}
+.abs{position:absolute;z-index:1}
+aside.note{display:none}
+
+/* ---------- type ---------- */
+.eyebrow{font-size:24px;letter-spacing:4px;color:var(--acid);text-transform:uppercase}
+.eyebrow.amber{color:var(--amber)}
+.h2{font-family:var(--display);font-size:72px;font-weight:700;line-height:1.05;text-wrap:balance;max-width:1500px}
+.h1{font-family:var(--display);font-weight:700;line-height:.96;letter-spacing:-2px}
+.h3{font-family:var(--display);font-size:38px;font-weight:700;line-height:1.15}
+.p{font-size:28px;line-height:1.5;color:var(--body)}
+.lead{font-size:34px;line-height:1.5;color:var(--body);max-width:1400px}
+.mute{color:var(--mute)}
+.acid{color:var(--acid)} .amb{color:var(--amber)} .bone{color:var(--bone)}
+.head{display:flex;flex-direction:column;gap:16px}
+
+/* ---------- blocks ---------- */
+.row{display:flex;gap:32px}
+.row > *{flex:1;min-width:0}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px}
+.card{background:var(--ink2);border:2px solid var(--line);padding:40px;display:flex;flex-direction:column;gap:16px}
+.alt .card{background:var(--ink)}
+.tight .card{padding:28px 32px;gap:10px}
+.card.hot{border-color:var(--acid)} .card.warn{border-color:var(--amber)}
+.card.fillacid{background:var(--acid);border-color:var(--acid);color:var(--ink)}
+.card.fillacid .p{color:var(--ink)}
+.n{font-family:var(--display);font-size:28px;font-weight:700;color:var(--acid)}
+.steps{display:flex;flex-direction:column;gap:22px}
+.steps p{font-size:30px;line-height:1.4}
+.steps b{color:var(--acid);margin-right:18px}
+.chip{display:inline-block;font-size:28px;padding:12px 22px;border:2px solid var(--line)}
+.chip.on{border-color:var(--acid);color:var(--acid);font-weight:700}
+.chips{display:flex;gap:16px;flex-wrap:wrap}
+
+/* code / terminal */
+.code{font-family:var(--mono);font-size:28px;line-height:1.6;background:var(--ink2);border:2px solid var(--line);padding:32px 40px;white-space:pre;color:var(--bone);overflow:hidden}
+.alt .code{background:var(--ink)}
+.code .k{color:var(--amber);font-weight:700}
+.code .g{color:var(--acid)}
+.code .c{color:var(--mute)}
+.code .x{color:var(--mute);text-decoration:line-through;text-decoration-color:var(--amber);text-decoration-thickness:3px}
+.tag{font-size:20px;letter-spacing:3px;color:var(--mute);text-transform:uppercase}
+
+/* table */
+table.t{width:100%;border-collapse:collapse;font-size:27px}
+table.t th{text-align:left;color:var(--acid);background:var(--ink2);padding:18px 22px;font-weight:700}
+table.t td{padding:18px 22px;border-top:2px solid var(--line);vertical-align:top}
+
+/* statement slides */
+.slide.state{justify-content:center;gap:44px;padding:128px}
+.slide.state.acidbg{background:var(--acid);color:var(--ink)}
+.slide.state.acidbg .eyebrow,.slide.state.acidbg .lead{color:var(--ink)}
+.slide.state .big{font-family:var(--display);font-size:128px;font-weight:700;line-height:.98;letter-spacing:-2px}
+
+/* dividers */
+.slide.divider{justify-content:center;gap:28px;padding:128px}
+.divider .kicker{font-size:32px;letter-spacing:6px;color:var(--acid)}
+.divider .title{font-family:var(--display);font-size:140px;font-weight:700;line-height:.95;letter-spacing:-2px;max-width:1040px}
+.divider .sub{font-size:40px;color:var(--body)}
+.owl{left:1196px;top:250px;width:580px;height:580px}
+
+/* footer, progress, nudge */
+.foot{position:absolute;left:128px;bottom:64px;font-size:22px;letter-spacing:3px;color:var(--mute);z-index:1}
+.acidbg .foot{color:var(--ink)}
+.progress{position:absolute;left:0;top:0;height:6px;width:100%;z-index:50;background:rgba(237,230,214,.08)}
+.progress i{display:block;height:100%;width:0;background:var(--acid);transition:width .85s var(--ease)}
+.nudge{position:absolute;right:96px;bottom:72px;z-index:50;display:flex;align-items:center;gap:18px;font-size:22px;letter-spacing:3px;color:var(--mute);transition:opacity .5s}
+.nudge span{font-family:var(--display);font-size:56px;color:var(--acid);animation:nudge 1.6s ease-in-out infinite}
+.nudge.gone{opacity:0;pointer-events:none}
+@keyframes nudge{0%,100%{transform:translateX(0);opacity:.55}50%{transform:translateX(14px);opacity:1}}
+
+/* ---------- element entrance: fade-up + stagger ---------- */
+.slide [data-a]{opacity:0;transform:translateY(10px)}
+.slide.play [data-a]{animation:up .7s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0) * 110ms + 180ms)}
+@keyframes up{to{opacity:1;transform:none}}
+
+/* ---------- indicators ---------- */
+.ring{width:280px;height:280px}
+.ring circle{fill:none;stroke-width:16}
+.ring .tr{stroke:var(--line)}
+.ring .fl{stroke:var(--acid);stroke-linecap:butt;stroke-dasharray:100;stroke-dashoffset:100;transform:rotate(-90deg);transform-origin:50% 50%}
+.play .ring .fl{transition:stroke-dashoffset 1.6s var(--ease) calc(var(--i,0) * 110ms + 400ms);stroke-dashoffset:calc(100 - var(--p))}
+.ringbox{position:relative;width:280px;height:280px}
+.ringbox .val{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:72px;font-weight:700}
+
+.gauge{width:520px;height:300px}
+.gauge path{fill:none;stroke-width:28}
+.gauge .tr{stroke:var(--line)}
+.gauge .fl{stroke:var(--amber);stroke-dasharray:100;stroke-dashoffset:100}
+.play .gauge .fl{transition:stroke-dashoffset 1.8s var(--ease) calc(var(--i,0) * 110ms + 400ms);stroke-dashoffset:calc(100 - var(--p))}
+
+.bar{height:22px;background:var(--line);position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0;background:var(--acid);transform:scaleX(0);transform-origin:left center}
+.bar.amberbar i{background:var(--amber)}
+.play .bar i{transition:transform 1.2s var(--ease) calc(var(--i,0) * 110ms + 450ms);transform:scaleX(var(--w))}
+
+.segs{display:flex;gap:10px}
+.segs span{flex:1;height:14px;background:var(--line)}
+.play .segs span{animation:lit .25s linear forwards;animation-delay:calc(var(--k) * var(--step,180ms) + 600ms)}
+.segs.amb span{--on:var(--amber)}
+@keyframes lit{to{background:var(--on,var(--acid))}}
+
+.count{font-variant-numeric:tabular-nums}
+
+/* ---------- background waves ---------- */
+.waves{position:absolute;inset:0;z-index:0;pointer-events:none;width:1920px;height:1080px}
+.waves path{fill:none;stroke-width:2}
+.waves.live g{animation:drift var(--d) linear infinite}
+.waves.live g:nth-child(even){animation-direction:reverse}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-480px)}}
+.waves.soft g{opacity:0;transform:translateY(14px)}
+.play .waves.soft g{animation:wup .9s ease forwards;animation-delay:calc(var(--j) * 120ms + 300ms)}
+@keyframes wup{to{opacity:1;transform:none}}
+
+/* notes */
+.notes{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);width:min(900px, calc(100% - 32px));background:var(--ink2);border:1px solid var(--line);color:var(--bone);font-size:15px;line-height:1.55;padding:16px 20px;z-index:100}
+.notes b{color:var(--acid);font-weight:700}
+
+.stage:focus,.stage:focus-visible{outline:none}
+
+@media (prefers-reduced-motion: reduce){
+  .slide.anim{transition:none}
+  .slide [data-a]{opacity:1;transform:none;animation:none!important}
+  .ring .fl,.gauge .fl{transition:none!important;stroke-dashoffset:calc(100 - var(--p))}
+  .bar i{transition:none!important;transform:scaleX(var(--w))}
+  .segs span{animation:none!important;background:var(--on,var(--acid))}
+  .waves g{animation:none!important;opacity:1!important;transform:none!important}
+  .nudge span{animation:none}
+  .progress i{transition:none}
+}
+</style>
+
+<!-- Root owl poses (shared sprite) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="owl-body"><path d="M130 290 L90 440 L350 440 L310 290 L220 322 Z" fill="#16181C"/><path d="M130 290 L150 330 L220 322 Z" fill="#2A2E35"/><path d="M310 290 L290 330 L220 322 Z" fill="#2A2E35"/><path d="M220 322 L220 440" stroke="#B6FF3B" stroke-width="4"/></g>
+    <g id="owl-head"><path d="M220 126 L282 66 L322 28 L312 128 L340 196 L304 278 L220 306 L136 278 L100 196 L128 128 L118 28 L158 66 Z" fill="#16181C"/><path d="M220 146 L290 124 L314 196 L282 258 L220 280 L158 258 L126 196 L150 124 Z" fill="#2A2E35"/><path d="M128 128 L118 28 L150 92 Z" fill="#2A2E35"/><path d="M312 128 L322 28 L290 92 Z" fill="#2A2E35"/><path d="M220 150 L236 182 L220 174 L204 182 Z" fill="#EDE6D6"/><path d="M206 222 L234 222 L220 262 Z" fill="#EDE6D6"/></g>
+    <g id="eyes-sharp"><path d="M144 172 L204 186 L198 214 L152 206 Z" fill="#B6FF3B"/><path d="M296 172 L236 186 L242 214 L288 206 Z" fill="#B6FF3B"/><path d="M176 184 L184 186 L182 208 L174 207 Z" fill="#0A0A0B"/><path d="M264 184 L256 186 L258 208 L266 207 Z" fill="#0A0A0B"/></g>
+    <g id="stripe"><path d="M0 300 L440 120 L440 190 L0 370 Z" fill="#B6FF3B"/><path d="M0 384 L440 204 L440 214 L0 394 Z" fill="#B6FF3B" opacity=".5"/></g>
+    <symbol id="owl-main" viewBox="0 0 440 440"><use href="#stripe"/><use href="#owl-body"/><path d="M134 298 L56 400 L84 396 L70 432 L108 410 L112 440 L146 336 Z" fill="#2A2E35"/><path d="M306 298 L384 400 L356 396 L370 432 L332 410 L328 440 L294 336 Z" fill="#2A2E35"/><use href="#owl-head"/><use href="#eyes-sharp"/></symbol>
+    <symbol id="owl-laptop" viewBox="0 0 440 440"><use href="#stripe"/><g transform="translate(30 0) scale(.86)"><path d="M130 290 L90 440 L350 440 L310 290 L220 322 Z" fill="#16181C"/><use href="#owl-head"/><path d="M144 184 L204 190 L200 210 L150 206 Z" fill="#B6FF3B"/><path d="M296 184 L236 190 L240 210 L290 206 Z" fill="#B6FF3B"/><path d="M176 192 L184 193 L183 208 L175 207 Z" fill="#0A0A0B"/><path d="M264 192 L256 193 L257 208 L265 207 Z" fill="#0A0A0B"/></g><path d="M98 290 L342 290 L360 440 L80 440 Z" fill="#8C8F96"/><path d="M106 298 L334 298 L350 440 L90 440 Z" fill="#B7BAC0"/><g transform="translate(196 318) scale(.22)"><path d="M0 24 L24 0 L240 0 L240 216 L216 240 L0 240 Z" fill="#0A0A0B"/><path d="M120 76 L160 40 L184 20 L178 82 L196 124 L174 176 L120 196 L66 176 L44 124 L62 82 L56 20 L80 40 Z" fill="#B6FF3B"/></g><rect x="114" y="372" width="70" height="26" rx="4" fill="#0A0A0B" transform="rotate(-8 149 385)"/><circle cx="296" cy="390" r="18" fill="#B6FF3B"/><path d="M287 390 L294 397 L306 383" stroke="#0A0A0B" stroke-width="4" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="owl-headset" viewBox="0 0 440 440"><use href="#stripe"/><path d="M130 290 L90 440 L350 440 L310 290 L220 322 Z" fill="#16181C"/><use href="#owl-head"/><use href="#eyes-sharp"/><path d="M102 186 Q100 46 220 40 Q340 46 338 186" stroke="#EDE6D6" stroke-width="10" fill="none"/><rect x="84" y="164" width="32" height="66" rx="8" fill="#EDE6D6"/><rect x="324" y="164" width="32" height="66" rx="8" fill="#EDE6D6"/><rect x="94" y="180" width="12" height="34" rx="3" fill="#B6FF3B"/><rect x="334" y="180" width="12" height="34" rx="3" fill="#B6FF3B"/><path d="M104 228 Q120 284 186 272" stroke="#EDE6D6" stroke-width="6" fill="none" stroke-linecap="round"/><rect x="182" y="264" width="20" height="14" rx="5" fill="#B6FF3B"/><rect x="30" y="312" width="180" height="110" rx="6" fill="#16181C" stroke="#2A2E35" stroke-width="4"/><rect x="230" y="312" width="180" height="110" rx="6" fill="#16181C" stroke="#2A2E35" stroke-width="4"/><path d="M36 312 L204 312" stroke="#B6FF3B" stroke-width="4"/><path d="M236 312 L404 312" stroke="#B6FF3B" stroke-width="4"/></symbol>
+    <symbol id="owl-lupa" viewBox="0 0 440 440"><use href="#stripe"/><use href="#owl-body"/><path d="M134 298 L56 400 L84 396 L70 432 L108 410 L112 440 L146 336 Z" fill="#2A2E35"/><path d="M306 298 L392 318 L396 340 L316 348 Z" fill="#2A2E35"/><path d="M388 292 L414 330" stroke="#EDE6D6" stroke-width="12" stroke-linecap="round"/><circle cx="360" cy="252" r="44" fill="#0A0A0B" stroke="#EDE6D6" stroke-width="9"/><rect x="336" y="236" width="48" height="32" fill="#EDE6D6"/><path d="M336 236 L360 256 L384 236" stroke="#0A0A0B" stroke-width="4" fill="none"/><path d="M372 250 L372 276 Q372 288 362 286 Q354 284 356 276" stroke="#FFB020" stroke-width="4" fill="none" stroke-linecap="round"/><use href="#owl-head"/><path d="M144 180 L204 188 L200 204 L150 200 Z" fill="#B6FF3B"/><path d="M296 180 L236 188 L240 204 L290 200 Z" fill="#B6FF3B"/></symbol>
+    <symbol id="owl-party" viewBox="0 0 440 440"><path d="M220 40 L244 120 L320 70 L280 150 L380 160 L290 200 L360 270 L260 240 L250 330 L220 250 L190 330 L180 240 L80 270 L150 200 L60 160 L160 150 L120 70 L196 120 Z" fill="#B6FF3B" opacity=".3"/><use href="#owl-body"/><path d="M134 298 L60 190 L44 214 L36 176 L96 204 L146 300 Z" fill="#2A2E35"/><path d="M306 298 L380 190 L396 214 L404 176 L344 204 L294 300 Z" fill="#2A2E35"/><use href="#owl-head"/><path d="M144 202 L174 178 L204 202 L196 210 L174 192 L152 210 Z" fill="#B6FF3B"/><path d="M236 202 L266 178 L296 202 L288 210 L266 192 L244 210 Z" fill="#B6FF3B"/></symbol>
+    <symbol id="root-icon" viewBox="0 0 240 240"><path d="M0 24 L24 0 L240 0 L240 216 L216 240 L0 240 Z" fill="#B6FF3B"/><path d="M120 76 L160 40 L184 20 L178 82 L196 124 L174 176 L120 196 L66 176 L44 124 L62 82 L56 20 L80 40 Z" fill="#0A0A0B"/></symbol>
+  </defs>
+</svg>
+
+<div class="viewport" id="viewport">
+<main class="stage" id="stage" tabindex="0" aria-label="Apresentação: Do conhecimento à ação. Use as setas para navegar.">
+<div class="progress" aria-hidden="true"><i id="bar"></i></div>
+<div class="nudge" id="nudge" aria-hidden="true">AVANÇAR <span>→</span></div>
+
+<!-- ================= ABERTURA ================= -->
+<section class="slide bare" data-title="Capa" style="justify-content:space-between;padding:112px 128px">
+  <svg class="waves live" data-waves="8" aria-hidden="true"></svg>
+  <svg class="abs owl" style="left:1176px;top:150px;width:600px;height:600px" role="img" aria-label="Root, a coruja do workshop"><use href="#owl-main"/></svg>
+  <div class="abs card warn" style="left:1176px;top:784px;width:600px;padding:24px 28px;gap:6px;border-width:0 0 0 6px" data-a><p class="p" style="font-size:24px"><b class="amb">31/10 · Halloween</b><br>O monstro mais assustador não usa fantasia. Usa ransomware.</p></div>
+  <div style="display:flex;align-items:center;gap:20px" data-a><svg width="56" height="56" aria-hidden="true"><use href="#root-icon"/></svg><p style="font-size:24px;letter-spacing:6px;color:var(--mute)">WORKSHOP PARA LÍDERES</p></div>
+  <div style="display:flex;flex-direction:column;gap:28px;width:1000px">
+    <p style="font-size:32px" class="acid" data-a>$ ./iniciar --modo-crise</p>
+    <h1 class="h1" style="font-size:120px;white-space:nowrap" data-a>Do conhecimento<br>à ação</h1>
+    <p style="font-family:var(--display);font-size:56px;font-weight:600" class="acid" data-a>Segurança para líderes</p>
+    <p class="p" style="font-size:32px" data-a>Você está preparado para liderar durante uma crise cibernética?</p>
+  </div>
+  <div class="chips" data-a><span class="chip on">31 OUT 2026</span><span class="chip">08:00 BRT</span><span class="chip">ADC1 · Sala Paraná</span></div>
+  <aside class="note">Boas-vindas. Hoje ninguém só ouve falar de ataque: todo mundo executa um. Faça a pergunta do slide em voz alta e deixe no ar; ela volta no final.</aside>
+</section>
+
+<section class="slide bare" data-title="Manchete: Binance" style="justify-content:center;gap:40px;padding:104px 128px">
+  <svg class="waves live" data-waves="7" aria-hidden="true"></svg>
+  <p class="eyebrow amber" data-a>// Enquanto isso — ontem, 29/10</p>
+  <h1 class="h1" style="font-size:104px" data-a>US$ 6,3 bilhões.<br>Em um dia.</h1>
+  <div style="display:flex;gap:28px;align-items:flex-start" data-a>
+    <div style="flex:1;background:#EDE6D6;color:#0A0A0B;padding:28px 30px;transform:rotate(-1.5deg)"><p style="font-size:16px;letter-spacing:2px;text-transform:uppercase;color:#6a6a6a">NeoFeed · 29 out 2026</p><p style="font-family:Georgia,'Times New Roman',serif;font-size:29px;font-weight:700;line-height:1.2;margin-top:10px">“Maior ataque hacker da história deixa rombo de US$ 6,3 bilhões na Binance”</p></div>
+    <div style="flex:1;background:#EDE6D6;color:#0A0A0B;padding:28px 30px;transform:rotate(1.2deg)"><p style="font-size:16px;letter-spacing:2px;text-transform:uppercase;color:#6a6a6a">Correio Braziliense</p><p style="font-family:Georgia,'Times New Roman',serif;font-size:29px;font-weight:700;line-height:1.2;margin-top:10px">“O que se sabe sobre o maior roubo da história das criptomoedas”</p></div>
+    <div style="flex:1;background:#EDE6D6;color:#0A0A0B;padding:28px 30px;transform:rotate(-0.8deg)"><p style="font-size:16px;letter-spacing:2px;text-transform:uppercase;color:#6a6a6a">InvestNews</p><p style="font-family:Georgia,'Times New Roman',serif;font-size:29px;font-weight:700;line-height:1.2;margin-top:10px">“Binance, maior exchange do mundo, é alvo de ataque de US$ 6,3 bilhões”</p></div>
+  </div>
+  <p class="lead" data-a style="max-width:1560px">O ponto de entrada não foi um super-hacker: começou com <b class="acid">uma única máquina comprometida</b> de um funcionário. Daí o atacante escalou até o controle. <b class="bone">Começa pequeno — como tudo que você vai ver hoje.</b></p>
+  <aside class="note">Abra com choque: isso saiu ontem. O maior roubo cripto da história, ~US$ 6,3 bi (R$ 33 bi), ligado por empresas de blockchain ao grupo norte-coreano Lazarus (Binance não confirma). A investigação preliminar apontou o notebook de um engenheiro de DevOps como porta de entrada. Fale 1–2 min e conecte: um ataque enorme quase sempre começa por uma brecha pequena. É isso que vamos destrinchar hoje.</aside>
+</section>
+
+<section class="slide" data-title="Objetivo">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Por que estamos aqui</p><h2 class="h2" data-a>Viver o ataque do lado de quem explora</h2></div>
+  <div class="row">
+    <div class="card" data-a><p class="n">01</p><h3 class="h3" style="font-size:44px">Ver</h3><p class="p">Como falhas comuns, em telas do dia a dia, viram incidentes reais.</p></div>
+    <div class="card" data-a><p class="n">02</p><h3 class="h3" style="font-size:44px">Fazer</h3><p class="p">Você mesmo executa o ataque, guiado e num ambiente seguro.</p></div>
+    <div class="card" data-a><p class="n">03</p><h3 class="h3" style="font-size:44px">Decidir</h3><p class="p">Entender por que decisões de segurança são decisões de negócio.</p></div>
+  </div>
+  <aside class="note">O objetivo não é formar técnicos. É fazer o gestor sentir na pele como um ataque acontece, para que na próxima priorização ele saiba o que está em jogo.</aside>
+</section>
+
+<section class="slide" data-title="Formato">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// O formato</p><h2 class="h2" data-a>3 cenários, 3 ataques reais</h2></div>
+  <table class="t" data-a>
+    <tr><th style="width:8%">#</th><th style="width:30%">Sistema</th><th style="width:24%">Falha</th><th>O que você vai fazer</th></tr>
+    <tr><td class="acid">01</td><td>Portal do paciente (MedClinic)</td><td>SQL Injection</td><td>Vazar o prontuário de ~1000 pacientes por um campo de busca</td></tr>
+    <tr><td class="acid">02</td><td>Portal do investidor (Meridian)</td><td>Command Injection</td><td>Transformar um “backup” em controle total do servidor</td></tr>
+    <tr><td class="acid">03</td><td>Caixa de e-mail</td><td>Phishing</td><td>Separar golpe de e-mail legítimo e, talvez, cair numa isca</td></tr>
+  </table>
+  <p class="p" data-a><b class="bone">Meridian Capital</b> (gestora) e <b class="bone">MedClinic</b> (clínica) são as empresas-cenário do lab; a <b class="bone">caixa de e-mail</b> é a sua. Tudo fictício — nomes, clientes e pacientes.</p>
+  <aside class="note">Cada cenário segue o mesmo roteiro: contexto, como funciona, impacto, código, ataque, mão na massa, recap e o que cobrar da TI.</aside>
+</section>
+
+<section class="slide alt" data-title="Placar">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Plataforma e placar</p><h2 class="h2" data-a>Vale ponto. E tem placar ao vivo.</h2></div>
+  <div class="row" style="align-items:center">
+    <div class="steps">
+      <p data-a><b>01</b>Crie sua conta na plataforma</p>
+      <p data-a><b>02</b>Capture as flags (cenários 1 e 2)</p>
+      <p data-a><b>03</b>Resolva a quest de phishing</p>
+      <p data-a><b>04</b>Acompanhe o placar ao vivo</p>
+    </div>
+    <div style="display:flex;gap:40px;align-items:center;justify-content:flex-end">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px" data-a>
+        <div class="ringbox"><svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle class="tr" cx="100" cy="100" r="84"/><circle class="fl" cx="100" cy="100" r="84" pathLength="100" style="--p:100"/></svg><span class="val count" data-count="100">100</span></div>
+        <p class="p" style="text-align:center">pts para quem<br>resolve primeiro</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px" data-a>
+        <div class="ringbox"><svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle class="tr" cx="100" cy="100" r="84"/><circle class="fl" cx="100" cy="100" r="84" pathLength="100" style="--p:50"/></svg><span class="val count" data-count="50">50</span></div>
+        <p class="p" style="text-align:center">piso: cai 10 a<br>cada novo solver</p>
+      </div>
+    </div>
+  </div>
+  <p class="p" data-a>Quest de phishing: <b class="acid">+10</b> por acerto · <b class="amb">−5</b> por erro.</p>
+  <aside class="note">Mostre o endereço da plataforma. As flags valem 100, 90, 80… até o piso de 50. No phishing, chutar não compensa: errar tira ponto.</aside>
+</section>
+
+<section class="slide" data-title="Regras">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow amber" data-a>// Regras do lab</p><h2 class="h2" data-a>Aqui pode. Lá fora, não.</h2></div>
+  <div class="row">
+    <div class="card" data-a><h3 class="h3">Ambiente isolado</h3><p class="p">Criado só para treino, deliberadamente vulnerável e separado da rede da empresa.</p></div>
+    <div class="card" data-a><h3 class="h3">Tudo é fictício</h3><p class="p">Meridian Capital, MedClinic, pacientes e clientes não existem.</p></div>
+    <div class="card warn" data-a><h3 class="h3 amb">Fora daqui é crime</h3><p class="p">Usar essas técnicas sem autorização é invasão de dispositivo (Lei 12.737/2012).</p></div>
+  </div>
+  <p class="p mute" data-a>O aviso de “site não seguro” no navegador é esperado: o lab usa um certificado próprio.</p>
+  <aside class="note">Objetivo defensivo. Ninguém testa nada disso em sistemas reais, nem da empresa.</aside>
+</section>
+
+<!-- ================= CENÁRIO 1 ================= -->
+<section class="slide divider bare" data-title="Cenário 1">
+  <svg class="waves live" data-waves="7" aria-hidden="true"></svg>
+  <svg class="abs owl" role="img" aria-label="Root digitando num notebook"><use href="#owl-laptop"/></svg>
+  <p class="kicker" data-a>// CENÁRIO 01</p>
+  <h1 class="title" data-a style="white-space:nowrap">SQL Injection</h1>
+  <p class="sub" data-a>MedClinic · Portal do Paciente</p>
+  <aside class="note">Primeiro cenário: um portal de clínica, coisa que todo mundo já usou para ver resultado de exame.</aside>
+</section>
+
+<section class="slide" data-title="C1 · Intro">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 01 · Intro</p><h2 class="h2" data-a>Um portal que todo mundo já usou</h2></div>
+  <div class="row">
+    <div class="card" data-a><p class="tag">O que o paciente vê</p><p class="p" style="color:var(--bone)">Perfil · Convênio · Consultas · Receitas · Exames</p><p class="p">Depois do login, cada paciente enxerga só os próprios dados.</p></div>
+    <div class="card hot" data-a><p class="tag">Onde está o risco</p><p class="p" style="color:var(--bone)">Uma busca “nos meus exames”.</p><p class="p">Um campo de texto comum, em que o paciente digita o nome de um exame.</p></div>
+  </div>
+  <aside class="note">Pergunte: quantos aqui já usaram um portal assim? A busca parece a coisa mais inofensiva da tela.</aside>
+</section>
+
+<section class="slide" data-title="C1 · Como funciona o normal" style="gap:40px;padding-top:108px">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 01 · Como funciona</p><h2 class="h2" data-a style="font-size:62px">Uma busca é uma pergunta ao banco</h2></div>
+  <div class="g3" data-a>
+    <div class="card" style="padding:28px"><p class="tag">Banco de dados</p><p class="p" style="color:var(--bone)">Onde o sistema guarda tudo: pacientes, exames, logins.</p></div>
+    <div class="card" style="padding:28px"><p class="tag">Tabela</p><p class="p" style="color:var(--bone)">Uma planilha dentro do banco. Ex.: <b>exames</b>, uma linha por exame.</p></div>
+    <div class="card" style="padding:28px"><p class="tag">Query (consulta SQL)</p><p class="p" style="color:var(--bone)">A pergunta que o sistema faz ao banco para trazer os dados.</p></div>
+  </div>
+<pre class="code" data-a style="font-size:24px">SELECT data, exame, resultado FROM exames
+WHERE  paciente_id = <span class="g">42</span>                 <span class="c">← o sistema põe: você</span>
+  AND  exame LIKE '%<span class="k">colesterol</span>%'      <span class="c">← você digita</span></pre>
+  <p class="p" data-a>Resultado normal: os 2 exames de colesterol da paciente 42. Nada mais.</p>
+  <aside class="note">SQL é a língua dos bancos de dados. A parte verde quem decide é o sistema; a parte laranja vem de você. Guarde essa imagem: o problema está na fronteira entre as duas.</aside>
+</section>
+
+<section class="slide" data-title="C1 · A falha">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 01 · A falha</p><h2 class="h2" data-a>E se o que você digita mudar a pergunta?</h2></div>
+  <p class="p" data-a>Em vez de um exame, digite: <b class="amb" style="font-size:32px">' OR 1=1 #</b></p>
+<pre class="code" data-a>WHERE  paciente_id = <span class="g">42</span>
+  AND  exame LIKE '%<span class="k">' OR 1=1 #</span><span class="x">%'</span></pre>
+  <div class="g3">
+    <div class="card" data-a><p class="h3 amb">'</p><p class="p">Fecha o texto antes da hora.</p></div>
+    <div class="card" data-a><p class="h3 amb">OR 1=1</p><p class="p">“…ou 1 é igual a 1”: sempre verdade, para qualquer paciente.</p></div>
+    <div class="card" data-a><p class="h3 amb">#</p><p class="p">Manda o banco ignorar o resto da linha.</p></div>
+  </div>
+  <aside class="note">O filtro “só os meus exames” existe apenas dentro da consulta. Se a consulta pode ser reescrita pelo usuário, o filtro deixa de existir.</aside>
+</section>
+
+<section class="slide state acidbg bare" data-title="C1 · Impacto">
+  <p class="eyebrow" data-a>// Mensagem para o gestor</p>
+  <h1 class="big" data-a>Um campo de busca.<br>~<span class="count" data-count="1000">1000</span> prontuários.</h1>
+  <p class="lead" data-a>Um paciente comum, logado na própria conta, lê nome, CPF, telefone, diagnósticos e sorologias, inclusive HIV, de outras pessoas.</p>
+  <p class="lead" style="font-weight:700" data-a>Dado sensível de saúde vazado: LGPD, reputação e risco jurídico.</p>
+  <aside class="note">Pause. Quanto custaria uma manchete dessas? Não foi preciso invadir servidor nenhum, só digitar numa busca.</aside>
+</section>
+
+<section class="slide" data-title="C1 · Código vulnerável">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 01 · Código vulnerável</p><h2 class="h2" data-a>O porquê técnico, em 4 linhas</h2></div>
+<pre class="code" data-a><span class="c">// busca nos exames do paciente logado (trecho simplificado)</span>
+sql = "SELECT data, exame, resultado FROM exames " +
+      "WHERE paciente_id = " + usuario.id +
+      " AND exame LIKE '%" + <span class="k">busca</span> + "%'"     <span class="c">← entrada colada no comando</span>
+db.query(sql)</pre>
+  <div class="row">
+    <div class="card warn" data-a><p class="h3">Concatenação</p><p class="p">O texto do usuário vira parte do comando SQL.</p></div>
+    <div class="card warn" data-a><p class="h3">Filtro só na query</p><p class="p">Ninguém confere no servidor se o exame é seu.</p></div>
+    <div class="card warn" data-a><p class="h3">Senhas em texto puro</p><p class="p">Quem lê a tabela de usuários lê as senhas.</p></div>
+  </div>
+  <aside class="note">Slide opcional para gestores. Se a turma for menos técnica, passe rápido e foque nos três cartões.</aside>
+</section>
+
+<section class="slide" data-title="C1 · Exploração">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 01 · Exploração</p><h2 class="h2" data-a>Do normal ao vazamento em 4 passos</h2></div>
+  <div class="row" style="align-items:stretch">
+    <div class="steps" style="flex:0 0 560px;gap:16px">
+      <p data-a style="font-size:26px"><b class="acid">1</b>Normal → só a própria paciente</p>
+      <p data-a style="font-size:26px"><b class="acid">2</b>Quebrar o filtro → centenas de pacientes</p>
+      <p data-a style="font-size:26px"><b class="acid">3</b>Extrair → CPF, e-mail e telefone</p>
+      <p data-a style="font-size:26px"><b class="acid">4</b>Escalar → senhas em texto puro → admin</p>
+      <p data-a style="font-size:22px;color:var(--mute)">Bônus — bypass de login: usuário <b class="amb">admin'#</b> + qualquer senha</p>
+    </div>
+<pre class="code" data-a style="flex:1;font-size:21px"><span class="c"># 2 · quebrar o filtro (vaza tudo)</span>
+<span class="k">' OR 1=1 #</span>
+
+<span class="c"># 3 · vazar dados pessoais dos pacientes</span>
+<span class="k">' AND 1=2 UNION SELECT name, birthdate,</span>
+<span class="k">  cpf, email, phone FROM patients #</span>
+
+<span class="c"># 4 · roubar as credenciais (vira admin)</span>
+<span class="k">' AND 1=2 UNION SELECT username, '',</span>
+<span class="k">  password, role, fullname FROM users #</span></pre>
+  </div>
+  <aside class="note">Para o UNION é preciso saber o número de colunas: ORDER BY 5 funciona, ORDER BY 6 dá erro, então são 5. No MySQL use # e não “-- ”, porque o formulário descarta o espaço que o -- exige. Payloads completos no roteiro técnico.</aside>
+</section>
+
+<section class="slide alt" data-title="C1 · Hands-on">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 01 · Mão na massa</p><h2 class="h2" data-a>Sua vez: até onde o vazamento vai?</h2></div>
+  <div class="row" style="align-items:flex-start">
+    <div class="steps">
+      <p data-a><b>01</b>Abra o Cenário 1 na plataforma</p>
+      <p data-a><b>02</b>Entre com <span class="acid">user / user123</span></p>
+      <p data-a><b>03</b>Faça uma busca normal e observe</p>
+      <p data-a><b>04</b>Quebre o filtro da busca</p>
+      <p data-a><b>05</b>Descubra quantas colunas a consulta tem</p>
+      <p data-a><b>06</b>Puxe pacientes, depois usuários</p>
+    </div>
+    <div class="card hot" data-a><p class="tag">Dica</p><p class="p" style="color:var(--bone)">Repare no contador de exames no topo da tela a cada passo.</p><p class="p">Travou? Volte ao slide “A falha” e releia as três peças.</p></div>
+  </div>
+  <aside class="note">Circule pela sala. Quem travar: lembre do OR 1=1 e do ORDER BY para contar colunas.</aside>
+</section>
+
+<section class="slide" data-title="C1 · Recap">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 01 · Recap e prova</p><h2 class="h2" data-a>Um campo de busca virou um vazamento de saúde</h2></div>
+  <div class="row" style="align-items:stretch">
+    <div class="card" data-a style="justify-content:center"><p class="tag">O contador no topo da tela</p><p class="h1" style="font-size:150px"><span class="count" data-count="1000">1000</span></p><p class="p">pacientes visíveis para um usuário comum, com CPF e diagnóstico.</p></div>
+    <div class="card hot" data-a style="justify-content:center;gap:24px"><p class="tag">A flag do cenário</p><p style="font-size:30px;font-weight:700;word-break:break-all" class="acid">FLAG{__C1_FLAG__}</p><p class="p">Estava escondida na tabela <b class="bone">secrets</b>. Quem chegou lá: submeta no placar.</p></div>
+  </div>
+  <aside class="note">Payload da flag: ' AND 1=2 UNION SELECT flag, CURDATE(), 'secret', name, flag FROM secrets #. Mostre a tela de quem chegou primeiro.</aside>
+</section>
+
+<section class="slide" data-title="C1 · Remediação">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 01 · O que cobrar da TI</p><h2 class="h2" data-a>Como se proteger</h2></div>
+  <div class="g3">
+    <div class="card" data-a><h3 class="h3">Consultas parametrizadas</h3><p class="p">O que o usuário digita é sempre dado, nunca comando.</p></div>
+    <div class="card" data-a><h3 class="h3">Autorização no servidor</h3><p class="p">O sistema confere quem pode ver o quê, não só a consulta.</p></div>
+    <div class="card" data-a><h3 class="h3">Senhas com hash forte</h3><p class="p">Nunca guardar senha em texto puro.</p></div>
+  </div>
+<pre class="code" data-a><span class="c">// corrigido: a busca entra como parâmetro, separada do comando</span>
+db.query("... WHERE paciente_id = ? AND exame LIKE ?", [usuario.id, "%" + <span class="g">busca</span> + "%"])</pre>
+  <p class="p acid" data-a>Pergunta para levar: nossos sistemas tratam o que o usuário digita como dado ou como comando?</p>
+  <aside class="note">Nenhuma dessas correções é cara. O caro é descobrir depois do vazamento.</aside>
+</section>
+
+<!-- ================= CENÁRIO 2 ================= -->
+<section class="slide divider bare" data-title="Cenário 2">
+  <svg class="waves live" data-waves="7" aria-hidden="true"></svg>
+  <svg class="abs owl" role="img" aria-label="Root de headset diante de dois monitores"><use href="#owl-headset"/></svg>
+  <p class="kicker" data-a>// CENÁRIO 02</p>
+  <h1 class="title" data-a>Command<br>Injection</h1>
+  <p class="sub" data-a>Meridian Capital · Portal do Investidor</p>
+  <aside class="note">Agora é a nossa empresa fictícia. E o alvo é uma função que parece inofensiva.</aside>
+</section>
+
+<section class="slide" data-title="C2 · Intro">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 02 · Intro</p><h2 class="h2" data-a>A carteira inteira, num portal</h2></div>
+  <div class="row">
+    <div class="card" data-a><p class="tag">O que o investidor vê</p><p class="p" style="color:var(--bone)">Patrimônio · Posições · Alocação · Transações</p><p class="p">Tudo o que um cliente de gestora espera encontrar.</p></div>
+    <div class="card hot" data-a><p class="tag">Onde está o risco</p><p class="p" style="color:var(--bone)">“Backup da carteira”</p><p class="p">Exporta um arquivo para um destino que o próprio usuário digita.</p></div>
+  </div>
+  <aside class="note">Uma funcionalidade útil, pedida pelo negócio. Guarde isso.</aside>
+</section>
+
+<section class="slide" data-title="C2 · Como funciona o normal">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 02 · Como funciona</p><h2 class="h2" data-a>Por trás do botão, o servidor executa comandos</h2></div>
+<pre class="code" data-a><span class="c">$</span> tar -czf carteira.tgz /dados/carteira-42          <span class="c">← compacta a carteira</span>
+<span class="c">$</span> enviar carteira.tgz <span class="k">s3://meridian-backups/carteira</span>   <span class="c">← destino que você digitou</span></pre>
+  <div class="g3">
+    <div class="card" data-a><p class="h3">Comando</p><p class="p">Uma ordem para o sistema operacional: programa + o que ele deve usar.</p></div>
+    <div class="card" data-a><p class="h3 amb">;</p><p class="p">Separa ordens: “faça isto; depois, faça aquilo”.</p></div>
+    <div class="card" data-a><p class="h3">root</p><p class="p">O superusuário. Pode ler, apagar e instalar qualquer coisa.</p></div>
+  </div>
+  <aside class="note">Um terminal é só uma lista de ordens. O ponto e vírgula é a peça que vai importar no próximo slide.</aside>
+</section>
+
+<section class="slide" data-title="C2 · A falha">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 02 · A falha</p><h2 class="h2" data-a>E se o destino trouxer uma ordem a mais?</h2></div>
+  <p class="p" data-a>Em vez de um destino, digite: <b class="amb" style="font-size:32px">x; id</b></p>
+<pre class="code" data-a><span class="c">$</span> enviar carteira.tgz <span class="k">x; id</span>
+<span class="c">  envio falhou: destino "x" inválido</span>
+<span class="g">  uid=0(root) gid=0(root) groups=0(root)</span></pre>
+  <div class="row">
+    <div class="card" data-a><p class="h3">Duas ordens, não uma</p><p class="p">O “x” vira destino; o “; id” vira um comando novo, executado no servidor.</p></div>
+    <div class="card warn" data-a><p class="h3 amb">uid=0(root)</p><p class="p">A resposta mostra que o serviço roda como superusuário.</p></div>
+  </div>
+  <aside class="note">id é um comando inofensivo que só diz “quem sou eu”. A resposta é o problema: root.</aside>
+</section>
+
+<section class="slide state acidbg bare" data-title="C2 · Impacto">
+  <div style="display:flex;align-items:center;gap:80px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:44px;min-width:0">
+      <p class="eyebrow" data-a>// Mensagem para o gestor</p>
+      <h1 class="big" data-a>Um botão de backup.<br>O servidor inteiro.</h1>
+      <p class="lead" data-a>Execução de comandos como root: ler a base de carteiras de todos os clientes, criar usuários, instalar backdoor e avançar para a rede interna.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:20px" data-a>
+      <div class="ringbox"><svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="84" style="stroke:rgba(10,10,11,.15)"/><circle class="fl" cx="100" cy="100" r="84" pathLength="100" style="--p:100;stroke:#0A0A0B"/></svg><span class="val" style="display:flex;align-items:center;justify-content:center;gap:2px"><span class="count" data-count="100">100</span>%</span></div>
+      <p style="font-size:26px;font-weight:700;text-align:center">do servidor sob<br>controle do atacante</p>
+    </div>
+  </div>
+  <aside class="note">Não foi um bug exótico, foi uma funcionalidade que o negócio pediu. Toda funcionalidade é superfície de ataque.</aside>
+</section>
+
+<section class="slide" data-title="C2 · Código vulnerável">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 02 · Código vulnerável</p><h2 class="h2" data-a>O destino é colado direto no shell</h2></div>
+<pre class="code" data-a><span class="c"># rota "Backup da carteira" (trecho simplificado)</span>
+destino = request.form["destino"]
+os.system("tar -czf /tmp/carteira.tgz /dados && enviar /tmp/carteira.tgz " + <span class="k">destino</span>)
+<span class="c"># o serviço roda como root</span></pre>
+  <div class="row">
+    <div class="card warn" data-a><p class="h3">Entrada no shell</p><p class="p">Qualquer ; | ou &amp;&amp; no campo injeta uma ordem nova.</p></div>
+    <div class="card warn" data-a><p class="h3">Sem validação</p><p class="p">O destino não precisa ter o formato esperado.</p></div>
+    <div class="card warn" data-a><p class="h3">Privilégio máximo</p><p class="p">Rodando como root, o estrago não tem limite.</p></div>
+  </div>
+  <aside class="note">Slide opcional. O ponto para gestores: três falhas pequenas somadas viram o pior caso.</aside>
+</section>
+
+<section class="slide" data-title="C2 · Exploração">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 02 · Exploração</p><h2 class="h2" data-a>De backup a root em 4 passos</h2></div>
+  <div style="display:flex;flex-direction:column;gap:30px">
+    <div style="display:grid;grid-template-columns:300px 560px 1fr;gap:32px;align-items:center" data-a><p class="p bone"><b class="acid">1</b>  Normal</p><p class="p" style="font-size:26px">s3://meridian-backups/carteira</p><div style="display:flex;flex-direction:column;gap:8px"><div class="bar" style="--w:.05"><i></i></div><p class="p" style="font-size:24px">o destino aparece colado no comando</p></div></div>
+    <div style="display:grid;grid-template-columns:300px 560px 1fr;gap:32px;align-items:center" data-a><p class="p bone"><b class="acid">2</b>  Testar</p><p class="p amb">x; id</p><div style="display:flex;flex-direction:column;gap:8px"><div class="bar" style="--w:.4"><i></i></div><p class="p" style="font-size:24px">uid=0(root): roda como superusuário</p></div></div>
+    <div style="display:grid;grid-template-columns:300px 560px 1fr;gap:32px;align-items:center" data-a><p class="p bone"><b class="acid">3</b>  Ler</p><p class="p amb">x; cat /etc/passwd</p><div style="display:flex;flex-direction:column;gap:8px"><div class="bar" style="--w:.7"><i></i></div><p class="p" style="font-size:24px">arquivos do sistema e usuários</p></div></div>
+    <div style="display:grid;grid-template-columns:300px 560px 1fr;gap:32px;align-items:center" data-a><p class="p bone"><b class="acid">4</b>  Dominar</p><p class="p amb">x; ls -la /root</p><div style="display:flex;flex-direction:column;gap:8px"><div class="bar amberbar" style="--w:1"><i></i></div><p class="p" style="font-size:24px">área do root, processos e base de clientes</p></div></div>
+  </div>
+  <aside class="note">Outros comandos para mostrar o alcance: uname -a; hostname; ps aux. A frase de fechamento: um campo de texto virou o servidor inteiro.</aside>
+</section>
+
+<section class="slide alt" data-title="C2 · Hands-on">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 02 · Mão na massa</p><h2 class="h2" data-a>Sua vez: transforme o backup em controle</h2></div>
+  <div class="row" style="align-items:flex-start">
+    <div class="steps">
+      <p data-a><b>01</b>Abra o Cenário 2 na plataforma</p>
+      <p data-a><b>02</b>Entre com <span class="acid">investidor / Invest@2024</span></p>
+      <p data-a><b>03</b>Faça um backup normal e leia o comando</p>
+      <p data-a><b>04</b>Descubra quem o servidor é</p>
+      <p data-a><b>05</b>Explore a área do superusuário</p>
+    </div>
+    <div class="card hot" data-a><p class="tag">Dica</p><p class="p" style="color:var(--bone)">O ponto e vírgula separa ordens.</p><p class="p">Tudo o que vem depois dele o servidor executa como se fosse dele.</p></div>
+  </div>
+  <aside class="note">Quem travar: comece com x; id. Depois peça para listar /root.</aside>
+</section>
+
+<section class="slide" data-title="C2 · Recap">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 02 · Recap e prova</p><h2 class="h2" data-a>Um campo de texto virou o servidor inteiro</h2></div>
+  <div class="row" style="align-items:stretch">
+<pre class="code" data-a style="font-size:26px"><span class="c">$</span> enviar carteira.tgz <span class="k">x; id</span>
+<span class="g">uid=0(root) gid=0(root)</span>
+<span class="c">$</span> enviar carteira.tgz <span class="k">x; ls -la /root</span>
+<span class="g">flag.txt  .ssh  carteiras.db  ...</span></pre>
+    <div class="card hot" data-a style="justify-content:center;gap:24px"><p class="tag">A flag do cenário</p><p style="font-size:30px;font-weight:700;word-break:break-all" class="acid">FLAG{__C2_FLAG__}</p><p class="p">Estava em <b class="bone">/root/flag.txt</b>, um arquivo que só o superusuário lê. Submeta no placar.</p></div>
+  </div>
+  <aside class="note">Comando da flag: x; cat /root/flag.txt. A listagem de /root no slide é ilustrativa; mostre a tela real de quem chegou primeiro.</aside>
+</section>
+
+<section class="slide" data-title="C2 · Remediação">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 02 · O que cobrar da TI</p><h2 class="h2" data-a>Como se proteger</h2></div>
+  <div class="g4">
+    <div class="card" data-a><h3 class="h3">Nada no shell</h3><p class="p">Entrada do usuário nunca vira parte de um comando.</p></div>
+    <div class="card" data-a><h3 class="h3">Comando separado</h3><p class="p">APIs que executam o programa sem passar por um shell.</p></div>
+    <div class="card" data-a><h3 class="h3">Lista do permitido</h3><p class="p">O destino só é aceito no formato esperado.</p></div>
+    <div class="card hot" data-a><h3 class="h3 acid">Privilégio mínimo</h3><p class="p">Nenhum serviço roda como root. Se cair, cai pequeno.</p></div>
+  </div>
+<pre class="code" data-a><span class="c"># corrigido: programa e argumentos separados, sem shell, sem root</span>
+subprocess.run(["enviar", "/tmp/carteira.tgz", <span class="g">destino</span>])</pre>
+  <aside class="note">Privilégio mínimo é o item que o gestor mais consegue cobrar sem entender de código: quais serviços rodam com acesso total, e por quê?</aside>
+</section>
+
+<section class="slide bare" data-title="Coffee break" style="justify-content:center;align-items:center;text-align:center;gap:36px">
+  <svg class="waves live" data-waves="7" aria-hidden="true"></svg>
+  <svg width="300" height="300" viewBox="0 0 300 300" data-a role="img" aria-label="Xícara de café fumegante">
+    <path d="M120 72 q-16 -24 0 -48" stroke="#B6FF3B" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M150 72 q-16 -24 0 -48" stroke="#B6FF3B" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M180 72 q-16 -24 0 -48" stroke="#B6FF3B" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M70 100 H210 V172 a55 55 0 0 1 -55 55 H125 a55 55 0 0 1 -55 -55 Z" fill="#16181C" stroke="#EDE6D6" stroke-width="8"/>
+    <ellipse cx="140" cy="108" rx="64" ry="13" fill="#B6FF3B"/>
+    <path d="M210 118 h24 a35 35 0 0 1 0 70 h-24" fill="none" stroke="#EDE6D6" stroke-width="8"/>
+    <path d="M58 250 H248" stroke="#EDE6D6" stroke-width="8" stroke-linecap="round"/>
+  </svg>
+  <p class="eyebrow" data-a>// pausa</p>
+  <h1 class="h1" style="font-size:132px" data-a>Coffee break</h1>
+  <p class="lead" data-a style="text-align:center">Estica as pernas, pega um café. A gente volta com os ataques.</p>
+  <div class="chips" data-a style="justify-content:center"><span class="chip on">15 minutos</span></div>
+  <aside class="note">Pausa entre os Cenários 2 e 3. Combine o horário exato de volta e aproveite para liberar o Cenário 3 no painel do instrutor antes de retomar.</aside>
+</section>
+
+<section class="slide" data-title="IA e phishing">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow amber" data-a>// O cenário lá fora</p><h2 class="h2" data-a>A IA deixou o phishing bom demais</h2></div>
+  <div class="row" style="align-items:stretch">
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:24px">
+      <p class="lead" data-a style="font-size:30px">Esqueça o “português torto”. Hoje a IA escreve o golpe sem erros, imita o tom de bancos e empresas e dispara em escala. Plataformas de <i>phishing-as-a-service</i> entregam tudo pronto para o criminoso.</p>
+      <p class="p" data-a>O e-mail perfeito que você vai ver no lab não é exagero: é o novo normal.</p>
+    </div>
+    <div style="flex:none;width:620px;display:grid;grid-template-columns:1fr 1fr;gap:20px" data-a>
+      <div class="card hot" style="padding:30px;gap:8px"><p class="h1 acid" style="font-size:68px">1,3bi</p><p class="p">ataques bloqueados na América Latina em 12 meses (+85%)</p></div>
+      <div class="card" style="padding:30px;gap:8px"><p class="h1" style="font-size:68px">553mi</p><p class="p">tentativas de phishing no Brasil — ~1,5 mi por dia</p></div>
+      <div class="card" style="padding:30px;gap:8px"><p class="h1" style="font-size:68px">2,6</p><p class="p">ataques de phishing por habitante, no país, no ano</p></div>
+      <div class="card warn" style="padding:30px;gap:8px"><p class="h1 amb" style="font-size:68px">+12%</p><p class="p">de ransomware no Brasil ante o ciclo anterior</p></div>
+    </div>
+  </div>
+  <p class="p mute" data-a>Fonte: Panorama de Ameaças de 2025, Kaspersky — via InfoMoney (set/2025).</p>
+  <aside class="note">Ponte para o Cenário 3. Dados do relatório da Kaspersky noticiados pela InfoMoney: 1,29 bi de ataques bloqueados na América Latina entre jul/2024 e jul/2025 (+85%); no Brasil, 553 mi de phishing (1,5 mi/dia, 2,6 por habitante) e alta de 12% em ransomware. A IA reduz a barreira técnica e deixa a isca convincente. O e-mail do lab foi feito nesse espírito.</aside>
+</section>
+
+<!-- ================= CENÁRIO 3 ================= -->
+<section class="slide divider bare" data-title="Cenário 3">
+  <svg class="waves live" data-waves="7" aria-hidden="true"></svg>
+  <svg class="abs owl" role="img" aria-label="Root examinando um e-mail com uma lupa"><use href="#owl-lupa"/></svg>
+  <p class="kicker" data-a>// CENÁRIO 03</p>
+  <h1 class="title" data-a>Phishing</h1>
+  <p class="sub" data-a>Phishing e engenharia social</p>
+  <p style="font-size:30px" class="amb" data-a>31/10: o monstro chega por e-mail.</p>
+  <aside class="note">O cenário mais próximo da realidade de todos aqui. Phishing não ataca a tecnologia, ataca a pessoa.</aside>
+</section>
+
+<section class="slide" data-title="C3 · Intro">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 03 · Intro</p><h2 class="h2" data-a>Sua caixa de entrada, com 10 e-mails</h2></div>
+  <div class="row" style="align-items:center">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <p class="lead" data-a>Uns são do dia a dia da Meridian. Outros são golpe. Você decide qual é qual.</p>
+      <p class="lead" data-a>Um deles é uma <b class="amb">isca</b>. Classificar errado não fica só no placar — tem consequência na sua máquina.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px" data-a>
+      <svg class="gauge" viewBox="0 0 520 300" aria-hidden="true"><path class="tr" d="M40 270 A220 220 0 0 1 480 270"/><path class="fl" d="M40 270 A220 220 0 0 1 480 270" pathLength="100" style="--p:50"/></svg>
+      <p style="font-family:var(--display);font-size:84px;font-weight:700;margin-top:-120px"><span class="count" data-count="5">5</span> de 10</p>
+      <p class="p">são phishing</p>
+    </div>
+  </div>
+  <aside class="note">Metade é golpe, metade é legítimo. E um dos legítimos é urgente de propósito.</aside>
+</section>
+
+<section class="slide" data-title="C3 · Como funciona">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 03 · Como funciona</p><h2 class="h2" data-a>O nome engana. O domínio, não.</h2></div>
+  <div class="row" style="align-items:center">
+<pre class="code" data-a style="font-size:23px;padding:28px 32px"><span class="c">De:</span>      Suporte TI &lt;suporte@<span class="k">meridian-ti.example</span>&gt;
+<span class="c">Para:</span>    você
+<span class="c">Assunto:</span> Sua senha expira em 24h</pre>
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="card" data-a style="padding:28px"><p class="h3" style="font-size:32px">Nome exibido</p><p class="p">“Suporte TI”: qualquer um escreve o nome que quiser.</p></div>
+      <div class="card warn" data-a style="padding:28px"><p class="h3 amb" style="font-size:32px">Domínio</p><p class="p">O que vale. O oficial é <b class="bone">@meridiancapital.example</b>.</p></div>
+      <div class="card" data-a style="padding:28px"><p class="h3" style="font-size:32px">Gatilho</p><p class="p">Pressão e prazo para você agir antes de pensar.</p></div>
+    </div>
+  </div>
+  <aside class="note">O golpe real não tem erro de português e logo torto. Ele usa a psicologia: autoridade, medo, pressa e recompensa.</aside>
+</section>
+
+<section class="slide state bare" data-title="C3 · Impacto" style="background:var(--ink)">
+  <p class="eyebrow amber" data-a>// Mensagem para o gestor</p>
+  <h1 class="big amb" data-a>Um clique.<br>E depois?</h1>
+  <p class="lead" data-a>Um clique de um colaborador pode abrir a porta para roubo de credenciais, transferência fraudulenta (BEC) ou coisa pior.</p>
+  <p class="lead bone" style="font-weight:700" data-a>A defesa mais barata e eficaz é gente treinada.</p>
+  <aside class="note">Nenhum firewall impede alguém de digitar a própria senha numa página falsa.</aside>
+</section>
+
+<section class="slide" data-title="C3 · Os 4 sinais">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 03 · Como o golpe engana</p><h2 class="h2" data-a>4 sinais de phishing</h2></div>
+  <div class="g4">
+    <div class="card" data-a><p class="h1 acid" style="font-size:96px">01</p><h3 class="h3">Domínio trocado</h3><p class="p">Letra a mais, letra trocada, domínio externo.</p></div>
+    <div class="card" data-a><p class="h1 acid" style="font-size:96px">02</p><h3 class="h3">Pressão</h3><p class="p">Ameaça, bloqueio, consequência.</p></div>
+    <div class="card" data-a><p class="h1 acid" style="font-size:96px">03</p><h3 class="h3">Urgência</h3><p class="p">Prazo curto, “agora”, “expira”.</p></div>
+    <div class="card" data-a><p class="h1 acid" style="font-size:96px">04</p><h3 class="h3">Recompensa</h3><p class="p">Prêmio, dinheiro, benefício liberado.</p></div>
+  </div>
+  <p class="p" data-a>Na dúvida, o que decide não é o tom: é o <b class="bone">domínio</b> e o <b class="bone">canal</b>.</p>
+  <aside class="note">Use estes 4 sinais como guia para a quest. Tom urgente, sozinho, não prova golpe.</aside>
+</section>
+
+<section class="slide alt" data-title="C3 · Hands-on">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 03 · Mão na massa</p><h2 class="h2" data-a>10 e-mails. Quais são golpe?</h2></div>
+  <div class="row" style="align-items:flex-start">
+    <div class="steps">
+      <p data-a><b>01</b>O instrutor libera o cenário</p>
+      <p data-a><b>02</b>Abra o webmail na plataforma</p>
+      <p data-a><b>03</b>Classifique: phishing ou legítimo</p>
+      <p data-a><b>04</b>Acerto <span class="acid">+10</span> · erro <span class="amb">−5</span></p>
+      <p data-a style="font-size:26px;color:var(--mute)">Sua VM pelo navegador: aluno / Workshop@2024</p>
+    </div>
+    <div class="card warn" data-a><p class="h3 amb">Cuidado</p><p class="p">Um desses e-mails é uma isca. Se você abrir o que ele oferece dentro da sua VM… vai descobrir.</p></div>
+  </div>
+  <aside class="note">Antes deste slide: liberar o Cenário 3 no painel do instrutor. A caixa só aparece depois disso.</aside>
+</section>
+
+<section class="slide bare" data-title="C3 · Recap: ransomware" style="justify-content:center;padding:128px">
+  <div style="display:flex;align-items:center;gap:72px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:36px;min-width:0">
+      <p class="eyebrow amber" data-a>// Cenário 03 · Recap e prova</p>
+      <h2 class="h2" data-a>Uma máquina caiu. Depois, a turma inteira.</h2>
+      <p class="lead" data-a>Simulação: nada é criptografado. A tela se espalha, uma VM a cada 5 segundos, como num surto real.</p>
+      <div data-a style="display:flex;flex-direction:column;gap:14px">
+        <div class="segs amb" style="--step:170ms" data-segs="20"></div>
+        <p class="p"><b class="amb"><span class="count" data-count="20" data-dur="3400">20</span> de 20</b> máquinas bloqueadas</p>
+      </div>
+    </div>
+    <div class="card warn" data-a style="width:600px;flex:none;align-items:center;text-align:center;gap:22px;border-width:4px;padding:56px 40px">
+      <p style="font-family:var(--display);font-size:46px;font-weight:700;line-height:1.1" class="amb">RANSOMWARE<br>ACTIVATED</p>
+      <p style="font-size:30px">DATA ENCRYPTED</p>
+      <p class="p" style="font-size:24px">Tela cheia na máquina do próprio participante. O kill-switch libera tudo na hora.</p>
+    </div>
+  </div>
+  <aside class="note">Momento de maior impacto. Se alguém cair na isca, o surto automático infecta as outras VMs. Se ninguém cair, dispare a cascata pelo painel. Deixe a turma sentir a tela por alguns segundos antes de reverter.</aside>
+</section>
+
+<section class="slide" data-title="C3 · Gabarito">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 03 · O gabarito</p><h2 class="h2" data-a>5 golpes, 5 técnicas reais</h2></div>
+  <table class="t" data-a style="font-size:26px">
+    <tr><th style="width:44%">Remetente</th><th>Técnica</th></tr>
+    <tr><td>Suporte TI · @meridian-ti.example</td><td>Domínio sósia + pressão (senha expira em 24h)</td></tr>
+    <tr><td>Cobrança · @nf-eletronica.example</td><td>Medo (protesto em cartório) + anexo .zip</td></tr>
+    <tr><td>Documento · @docs-share.example</td><td><b class="amb">A isca:</b> urgência (“expira em 2 horas”)</td></tr>
+    <tr><td>CFO · @meridiancap<b class="amb">l</b>tal.example</td><td>Fraude do CEO: autoridade, sigilo e letra trocada (l no lugar de i)</td></tr>
+    <tr><td>Benefícios · @meridian-beneficios.example</td><td>Recompensa: PLR liberada + dados bancários</td></tr>
+  </table>
+  <p class="p" data-a>Os 5 legítimos vêm de @meridiancapital.example. O da Compliance é urgente e real: tom urgente, sozinho, não prova golpe.</p>
+  <aside class="note">Destaque o e-mail do CFO: é o que mais engana, a letra trocada é quase invisível.</aside>
+</section>
+
+<section class="slide" data-title="C3 · Remediação">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Cenário 03 · O que cobrar da organização</p><h2 class="h2" data-a>Como se proteger</h2></div>
+  <div class="g3">
+    <div class="card" data-a><h3 class="h3">Treino recorrente</h3><p class="p">Simulações de phishing ao longo do ano.</p></div>
+    <div class="card" data-a><h3 class="h3">MFA</h3><p class="p">Senha roubada sozinha não abre a porta.</p></div>
+    <div class="card" data-a><h3 class="h3">Segundo canal</h3><p class="p">Pagamento só com confirmação por outro meio.</p></div>
+    <div class="card" data-a><h3 class="h3">Camadas técnicas</h3><p class="p">Filtro de e-mail, aviso de externo, EDR e backup testado.</p></div>
+    <div class="card" data-a><h3 class="h3">Canal de report</h3><p class="p">Todo mundo sabe onde avisar “recebi algo estranho”.</p></div>
+    <div class="card fillacid" data-a style="justify-content:center"><p class="h3" style="font-size:44px">report &gt; ignore</p><p class="p">Quem reporta rápido encurta o ataque.</p></div>
+  </div>
+  <aside class="note">Pergunte: qual é hoje o nosso canal para reportar um e-mail suspeito? Se houver hesitação, esse é o primeiro ponto de ação.</aside>
+</section>
+
+<!-- ================= FECHAMENTO ================= -->
+<section class="slide alt" data-title="Liderando na crise" style="gap:36px;padding-top:112px">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow amber" data-a>// E se for de verdade?</p><h2 class="h2" data-a>O papel do líder nas primeiras horas</h2></div>
+  <div class="segs" style="--step:260ms" data-segs="6" data-a></div>
+  <div class="g3 tight">
+    <div class="card" data-a><h3 class="h3"><span class="acid">01</span> Acionar</h3><p class="p">Chame o time de resposta pelo canal oficial. Não resolva sozinho.</p></div>
+    <div class="card" data-a><h3 class="h3"><span class="acid">02</span> Conter</h3><p class="p">Apoie isolar o que foi afetado, mesmo que pare a operação.</p></div>
+    <div class="card" data-a><h3 class="h3"><span class="acid">03</span> Preservar</h3><p class="p">Não apague nada. Evidência explica o que aconteceu.</p></div>
+    <div class="card" data-a><h3 class="h3"><span class="acid">04</span> Priorizar</h3><p class="p">Pelo plano de continuidade: o que precisa voltar primeiro?</p></div>
+    <div class="card" data-a><h3 class="h3"><span class="acid">05</span> Comunicar</h3><p class="p">Uma voz só, com jurídico e comunicação. A LGPD exige avisar.</p></div>
+    <div class="card warn" data-a><h3 class="h3 amb">06 Não negociar no impulso</h3><p class="p">Resgate é decisão de diretoria, com jurídico e especialistas.</p></div>
+  </div>
+  <aside class="note">Dinâmica: “a tela bloqueada que vocês viram agora aconteceu na empresa inteira. Quem chama quem? O que volta primeiro?” Deixe a turma responder antes de mostrar os seis pontos. Ajuste canais e responsáveis para a realidade da empresa.</aside>
+</section>
+
+<section class="slide" data-title="Placar final">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// Placar final</p><h2 class="h2" data-a>E quem levou?</h2></div>
+  <div class="row" style="align-items:flex-end">
+    <div class="card" data-a style="align-items:center;padding:40px"><p class="h1 mute" style="font-size:72px">2º</p><p style="font-size:32px;font-weight:700">[NOME]</p><p class="p">[PONTOS] pts</p></div>
+    <div class="card fillacid" data-a style="align-items:center;padding:64px 40px"><p class="h1" style="font-size:96px">1º</p><p style="font-size:36px;font-weight:700">[NOME]</p><p class="p">[PONTOS] pts</p></div>
+    <div class="card" data-a style="align-items:center;padding:32px"><p class="h1 mute" style="font-size:72px">3º</p><p style="font-size:32px;font-weight:700">[NOME]</p><p class="p">[PONTOS] pts</p></div>
+  </div>
+  <aside class="note">Abra o placar ao vivo (/dashboard) e preencha o pódio, ou mostre o dashboard direto. Bom momento para entregar os adesivos do Root.</aside>
+</section>
+
+<section class="slide" data-title="Mensagens-chave">
+  <svg class="waves soft" data-waves="5" aria-hidden="true"></svg>
+  <div class="head"><p class="eyebrow" data-a>// O que fica</p><h2 class="h2" data-a>4 ideias para sair daqui</h2></div>
+  <div class="g2">
+    <div class="card" data-a><h3 class="h3" style="font-size:40px"><span class="acid">01</span> Toda funcionalidade é superfície de ataque</h3><p class="p">Busca, backup, e-mail: o útil pode virar brecha.</p></div>
+    <div class="card" data-a><h3 class="h3" style="font-size:40px"><span class="acid">02</span> Segurança é decisão de negócio</h3><p class="p">Consultas parametrizadas, privilégio mínimo, MFA e treino são gestão de risco.</p></div>
+    <div class="card" data-a><h3 class="h3" style="font-size:40px"><span class="acid">03</span> O elo humano é central</h3><p class="p">Um clique derruba o melhor firewall. Treinar gente rende mais.</p></div>
+    <div class="card" data-a><h3 class="h3" style="font-size:40px"><span class="acid">04</span> Defesa em camadas</h3><p class="p">Nenhuma medida basta sozinha. É a soma que protege.</p></div>
+  </div>
+  <aside class="note">Amarre cada ideia a um cenário: 1 e 2 com SQL e command injection, 3 com o phishing, 4 com tudo junto.</aside>
+</section>
+
+<section class="slide bare" data-title="Encerramento" style="justify-content:center;gap:36px">
+  <svg class="waves live" data-waves="8" aria-hidden="true"></svg>
+  <svg class="abs owl" role="img" aria-label="Root comemorando de asas erguidas"><use href="#owl-party"/></svg>
+  <p style="font-size:32px" class="acid" data-a>$ exit 0</p>
+  <h1 class="h1" style="font-size:92px;line-height:1.02;width:1000px;letter-spacing:-1px" data-a>Você está preparado para liderar durante uma crise cibernética?</h1>
+  <p class="lead" style="width:960px" data-a>Agora você sabe por onde começar.</p>
+  <div class="chips" data-a><span class="chip on" style="background:var(--acid);color:var(--ink)">Obrigado · Perguntas?</span><span class="chip">Time de Cyber</span></div>
+  <aside class="note">Volte à pergunta da capa. Peça para cada um dizer a primeira coisa que vai cobrar na própria área na segunda-feira.</aside>
+</section>
+
+</main>
+</div>
+<div class="notes" id="notes" hidden></div>
+
+<script>
+(function(){
+  const stage = document.getElementById('stage');
+  const vp = document.getElementById('viewport');
+  const slides = Array.from(stage.querySelectorAll('.slide'));
+  const N = slides.length;
+  const bar = document.getElementById('bar');
+  const nudge = document.getElementById('nudge');
+  const notesEl = document.getElementById('notes');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let cur = 0, busy = false, notesOn = false;
+
+  // fit stage to window
+  function fit(){
+    const w = vp.clientWidth - 32, h = vp.clientHeight - 24;
+    const s = Math.max(0.1, Math.min(w/1920, h/1080));
+    stage.style.transform = `translate(-50%,-50%) scale(${s})`;
+    stage.style.transformOrigin = '50% 50%';
+  }
+  window.addEventListener('resize', fit); fit();
+
+  // stagger indexes, footers, segments, waves
+  slides.forEach((sl, idx) => {
+    sl.querySelectorAll('[data-a]').forEach((el, i) => el.style.setProperty('--i', i));
+    if(!sl.classList.contains('bare')){
+      const f = document.createElement('p'); f.className = 'foot abs';
+      f.textContent = 'DO CONHECIMENTO À AÇÃO · ' + String(idx+1).padStart(2,'0');
+      sl.appendChild(f);
+    }
+    sl.querySelectorAll('[data-segs]').forEach(box => {
+      const n = +box.dataset.segs;
+      for(let k=0;k<n;k++){ const s = document.createElement('span'); s.style.setProperty('--k', k); box.appendChild(s); }
+    });
+    sl.querySelectorAll('svg.waves').forEach(svg => buildWaves(svg, +svg.dataset.waves || 5, svg.classList.contains('live')));
+  });
+
+  function buildWaves(svg, n, live){
+    svg.setAttribute('viewBox','0 0 1920 1080');
+    const NS = 'http://www.w3.org/2000/svg';
+    const len = 480;
+    for(let j=0;j<n;j++){
+      const g = document.createElementNS(NS,'g');
+      const baseY = live ? 640 + j*52 : 860 + j*30;
+      const amp = live ? 26 + j*5 : 12 + j*3;
+      const ph = j * 0.7;
+      let d = '';
+      for(let x=0; x<=1920+len; x+=16){
+        const y = baseY + Math.sin((x/len)*Math.PI*2 + ph) * amp;
+        d += (x===0 ? 'M' : ' L') + x + ' ' + y.toFixed(1);
+      }
+      const p = document.createElementNS(NS,'path');
+      p.setAttribute('d', d);
+      const op = live ? (0.10 + 0.05*(j%3)) : (0.06 + 0.03*(j%2));
+      p.setAttribute('stroke', j % 4 === 1 ? 'rgba(255,176,32,' + op + ')' : 'rgba(182,255,59,' + op + ')');
+      g.appendChild(p);
+      g.style.setProperty('--d', (14 + j*3) + 's');
+      g.style.setProperty('--j', j);
+      svg.appendChild(g);
+    }
+  }
+
+  // counters
+  function runCounters(sl){
+    sl.querySelectorAll('[data-count]').forEach(el => {
+      const target = +el.dataset.count;
+      if(reduce){ el.textContent = target; return; }
+      const host = el.closest('[data-a]');
+      const i = host ? +(getComputedStyle(host).getPropertyValue('--i') || 0) : 0;
+      const delay = i*110 + 450, dur = +(el.dataset.dur || 1400);
+      el.textContent = '0';
+      const t0 = performance.now() + delay;
+      const tick = now => {
+        if(!sl.classList.contains('play')) return;
+        const t = Math.min(1, Math.max(0, (now - t0)/dur));
+        const e = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(target * e);
+        if(t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function play(sl){
+    sl.classList.remove('play'); void sl.offsetWidth; sl.classList.add('play'); runCounters(sl);
+  }
+
+  function ui(){
+    bar.style.width = ((cur+1)/N*100) + '%';
+    if(cur > 0) nudge.classList.add('gone');
+    if(notesOn) showNotes();
+    try{ history.replaceState(null, '', '#s' + (cur+1)); }catch(e){}
+  }
+
+  function showNotes(){
+    const a = slides[cur].querySelector('aside.note');
+    notesEl.innerHTML = '';
+    const b = document.createElement('b'); b.textContent = (cur+1) + '/' + N + ' · ' + (slides[cur].dataset.title || '') + '  ';
+    notesEl.appendChild(b);
+    notesEl.appendChild(document.createTextNode(a ? a.textContent : 'Sem notas.'));
+  }
+
+  function go(n){
+    if(busy || n === cur || n < 0 || n >= N) return;
+    const a = slides[cur], b = slides[n], fwd = n > cur;
+    if(reduce){
+      a.className = a.className.replace(/\b(active|play|at-right|at-back|anim)\b/g,'').trim();
+      b.classList.add('active'); cur = n; play(b); ui(); return;
+    }
+    busy = true;
+    b.classList.remove('active','at-right','at-back','anim','play');
+    b.classList.add(fwd ? 'at-right' : 'at-back');
+    b.style.zIndex = fwd ? 3 : 2; a.style.zIndex = fwd ? 2 : 3;
+    void b.offsetWidth;
+    a.classList.add('anim'); b.classList.add('anim');
+    b.classList.remove('at-right','at-back'); b.classList.add('active');
+    a.classList.remove('active'); a.classList.add(fwd ? 'at-back' : 'at-right');
+    cur = n; ui();
+    setTimeout(() => play(b), 260);
+    setTimeout(() => {
+      a.classList.remove('anim','at-back','at-right','play'); b.classList.remove('anim');
+      a.style.zIndex = ''; b.style.zIndex = ''; busy = false;
+    }, 880);
+  }
+  const next = () => go(cur+1), prev = () => go(cur-1);
+
+  document.addEventListener('keydown', e => {
+    if(e.altKey || e.ctrlKey || e.metaKey) return;
+    const k = e.key;
+    if(['ArrowRight','PageDown',' ','Enter'].includes(k)){ e.preventDefault(); next(); }
+    else if(['ArrowLeft','PageUp','Backspace'].includes(k)){ e.preventDefault(); prev(); }
+    else if(k === 'Home'){ go(0); } else if(k === 'End'){ go(N-1); }
+    else if(k === 'f' || k === 'F'){ const el = document.documentElement; (document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen && el.requestFullscreen()).catch?.(()=>{}); }
+    else if(k === 'n' || k === 'N'){ notesOn = !notesOn; notesEl.hidden = !notesOn; if(notesOn) showNotes(); }
+  });
+  stage.addEventListener('click', e => {
+    const r = stage.getBoundingClientRect();
+    (e.clientX - r.left) < r.width * 0.3 ? prev() : next();
+  });
+  let tx = null;
+  stage.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+  stage.addEventListener('touchend', e => { if(tx === null) return; const dx = e.changedTouches[0].clientX - tx; if(Math.abs(dx) > 40) (dx < 0 ? next() : prev()); tx = null; });
+
+  window.addEventListener('hashchange', () => { const h = /^#s(\d+)$/.exec(location.hash); if(h){ const t = Math.min(N-1, Math.max(0, +h[1]-1)); if(t !== cur) go(t); } });
+  // start
+  const m = /^#s(\d+)$/.exec(location.hash);
+  cur = m ? Math.min(N-1, Math.max(0, +m[1]-1)) : 0;
+  slides[cur].classList.add('active');
+  play(slides[cur]); ui();
+  stage.focus({preventScroll:true});
+})();
+</script>
+
+</body></html>
