@@ -26,6 +26,7 @@ Tudo é fictício — empresas, pacientes, clientes, domínios. Os domínios nos
 ```text
 cyber-workshop/
 ├── README.md
+├── LOCAL_SETUP.md                 # guia de execução local (passo a passo)
 ├── LICENSE                      # MIT + cláusula de uso ético
 ├── .gitignore
 ├── docs/
@@ -69,6 +70,8 @@ cyber-workshop/
 ---
 
 ## Como subir o laboratório
+
+> Para um guia detalhado de execução local, veja [LOCAL_SETUP.md](LOCAL_SETUP.md).
 
 ### 1. Clone e configure o ambiente
 
