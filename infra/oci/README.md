@@ -1,4 +1,4 @@
-# infra-oci — provisionamento do Workshop Cyber na Oracle Cloud
+# infra/oci - provisionamento do Workshop Cyber na Oracle Cloud
 
 Sobe/derruba todo o ambiente do workshop na OCI com a OCI CLI:
 
@@ -34,7 +34,7 @@ mgmt **antes** de rodar.
 
 ## Uso
 ```bash
-cd infra-oci
+cd infra/oci
 nano config.env          # revise contagem, tamanho, RDP_PASS, ADMIN_CIDR…
 
 ./up.sh                  # sem TLS   (ou ./up-tls.sh para TLS)
