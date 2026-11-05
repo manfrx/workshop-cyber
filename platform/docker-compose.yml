@@ -1,0 +1,40 @@
+# =====================================================================
+#  Plataforma do workshop — stack do componente
+#
+#  Placar, quest de phishing e submissão de flags.
+#  Usado pelo provisionamento OCI (infra/oci/configure-mgmt.sh), que escreve
+#  o platform/.env com os dados da edição antes de subir.
+#
+#  Usa a rede do host: a plataforma precisa alcançar as VMs de participante
+#  (porta SIM_PORT) para disparar /hack e /voltar; um container em bridge
+#  nao alcanca a subnet privada da VCN.
+# =====================================================================
+
+services:
+  platform:
+    build: .
+    container_name: workshop-platform
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      PORT: 3005
+      DB_FILE: /data/db.json
+      SESSION_SECRET: "${SESSION_SECRET:-troque-este-segredo-no-workshop}"
+      # Chave do painel do instrutor: http://localhost:3005/admin?key=<ADMIN_KEY>
+      ADMIN_KEY: "${ADMIN_KEY:-troque-esta-chave-do-instrutor}"
+      # Login do painel do instrutor (/admin) -> HTTP Basic
+      ADMIN_USER: "${ADMIN_USER:-admin}"
+      ADMIN_PASS: "${ADMIN_PASS:-Cyber@2022}"
+      # VMs de participante p/ disparar /hack e /voltar na simulacao (porta SIM_PORT)
+      PARTICIPANT_IPS: "${PARTICIPANT_IPS:-}"
+      SIM_PORT: "${SIM_PORT:-10000}"
+      # URL para onde o link do e-mail-isca aponta (pagina de phishing / simulacao)
+      PHISHING_URL: "${PHISHING_URL:-http://localhost:3003/documento}"
+      # Flags aceitas no placar (validacao das submissoes)
+      C1_FLAG: "${C1_FLAG:-}"
+      C2_FLAG: "${C2_FLAG:-}"
+    volumes:
+      - platform-data:/data
+
+volumes:
+  platform-data:

@@ -1,0 +1,22 @@
+# =====================================================================
+#  Cenário 3 · Controle da simulação de phishing — stack do componente
+#
+#  Servidor de controle: publica a pagina-isca (/documento), baixa o
+#  "documento" inerte e dispara /hack e /voltar nas VMs de participante.
+#  Usado pelo provisionamento OCI (infra/oci/configure-mgmt.sh).
+# =====================================================================
+
+services:
+  control:
+    build: .
+    container_name: meridian-control
+    restart: unless-stopped
+    environment:
+      PORT: 3003
+      # GET disparado pela isca 5s DEPOIS do download (servico local na VM da vitima).
+      HACK_URL: "${HACK_URL:-http://127.0.0.1:10000/hack}"
+      HACK_DELAY_MS: "${HACK_DELAY_MS:-5000}"
+    ports:
+      # Só no loopback; o acesso externo e via nginx TLS (porta 3003 e rotas
+      # /documento etc na 443).
+      - "127.0.0.1:13003:3003"

@@ -1,0 +1,77 @@
+# =====================================================================
+#  Cenário 1 · MedClinic (SQL Injection) — stack do componente
+#
+#  Usado pelo provisionamento OCI (infra/oci/configure-mgmt.sh), que sobe
+#  cada componente isoladamente e deixa o nginx na frente.
+#  Para o lab inteiro de uma vez, use infra/docker-compose.yml.
+#
+#  O app fica no loopback (127.0.0.1:13000); o acesso externo e via nginx TLS.
+# =====================================================================
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: medclinic-db
+    restart: unless-stopped
+    # O seed fica montado somente-leitura em /seed. Antes de o MySQL subir,
+    # copiamos o script para o diretório de init do container substituindo os
+    # marcadores __C1_FLAG__ e __C1_DB_NAME__ pelos valores do ambiente.
+    # A flag NUNCA e hardcoded no repositorio.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        mkdir -p /docker-entrypoint-initdb.d
+        FLAGVAL="$${C1_FLAG}"
+        [ -n "$$FLAGVAL" ] || FLAGVAL='FLAG{PLACEHOLDER_C1}'
+        DBNAME="$${C1_DB_NAME}"
+        [ -n "$$DBNAME" ] || DBNAME='medclinic'
+        for f in /seed/*; do
+          [ -f "$$f" ] || continue
+          base=$$(basename "$$f")
+          case "$$base" in
+            *.sql) sed -e "s|__C1_FLAG__|$$FLAGVAL|g" -e "s|__C1_DB_NAME__|$$DBNAME|g" "$$f" > "/docker-entrypoint-initdb.d/$$base" ;;
+            *)     cp "$$f" "/docker-entrypoint-initdb.d/$$base" ;;
+          esac
+        done
+        exec docker-entrypoint.sh mysqld
+    environment:
+      MYSQL_ROOT_PASSWORD: ${C1_DB_PASSWORD}
+      MYSQL_DATABASE: ${C1_DB_NAME}
+      MYSQL_USER: ${C1_DB_USER}
+      MYSQL_PASSWORD: ${C1_DB_PASSWORD}
+      C1_FLAG: ${C1_FLAG}
+      C1_DB_NAME: ${C1_DB_NAME}
+    volumes:
+      - ./seed:/seed:ro
+      - dbdata:/var/lib/mysql
+    ports:
+      # Só no loopback — o banco nao e exposto na internet.
+      - "127.0.0.1:3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${C1_DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: medclinic-app
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${C1_DB_USER}
+      DB_PASSWORD: ${C1_DB_PASSWORD}
+      DB_NAME: ${C1_DB_NAME}
+      PORT: 3000
+    # Só no loopback; o acesso externo e via nginx TLS na 3000.
+    ports:
+      - "127.0.0.1:13000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dbdata:

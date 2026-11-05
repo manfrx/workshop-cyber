@@ -1,0 +1,20 @@
+# =====================================================================
+#  Cenário 3 · Webmail de treinamento — stack do componente
+#
+#  Caixa de e-mail ficticia com a quest de phishing.
+#  (Na OCI, quem expoe a quest e a plataforma; este webmail standalone
+#   fica disponivel para uso avulso.)
+# =====================================================================
+
+services:
+  webmail:
+    build: .
+    container_name: meridian-webmail
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      # URL para onde o link do e-mail-isca aponta (a página de phishing).
+      # No workshop/OCI, troque para https://seu-dominio/documento
+      PHISHING_URL: "${PHISHING_URL:-http://127.0.0.1:3003/documento}"
+    ports:
+      - "3002:3000"

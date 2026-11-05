@@ -1,0 +1,23 @@
+# =====================================================================
+#  Cenário 2 · Meridian (Command Injection) — stack do componente
+#
+#  Usado pelo provisionamento OCI (infra/oci/configure-mgmt.sh).
+#  Para o lab inteiro de uma vez, use infra/docker-compose.yml.
+# =====================================================================
+
+services:
+  app:
+    # O container roda como root (padrao da imagem) de proposito: o command
+    # injection jae tem privilegios de root, e a flag fica em /root/flag.txt.
+    # A flag entra no BUILD (arg), nunca no repositorio.
+    build:
+      context: .
+      args:
+        C2_FLAG: ${C2_FLAG}
+    container_name: meridian-app
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+    # Só no loopback; o acesso externo e via nginx TLS na 3001.
+    ports:
+      - "127.0.0.1:13001:3000"

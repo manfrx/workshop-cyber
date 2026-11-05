@@ -17,6 +17,20 @@ ENABLE_TLS="${ENABLE_TLS:-0}"
 case "${RDP_PASS:-}"   in CHANGE_ME_*) RDP_PASS=""   ;; esac
 case "${ADMIN_PASS:-}" in CHANGE_ME_*) ADMIN_PASS="" ;; esac
 
+# Credenciais do banco e flags da edicao (Cenario 1 e 2).
+C1_DB_NAME="${C1_DB_NAME:-medclinic}"
+C1_DB_USER="${C1_DB_USER:-appuser}"
+C1_DB_PASSWORD="${C1_DB_PASSWORD:-}"
+C1_FLAG="${C1_FLAG:-}"
+C2_FLAG="${C2_FLAG:-}"
+SESSION_SECRET="${SESSION_SECRET:-}"
+ADMIN_KEY="${ADMIN_KEY:-}"
+
+# As flags precisam ser reais: com placeholder, a flag do cenário fica
+# "placeholder" e o gabarito do instrutor não bate com a do participante.
+case "${C1_FLAG:-}" in CHANGE_ME_*|"") warn "C1_FLAG nao definida no config.env - a flag do Cenario 1 ficara como placeholder" ;; esac
+case "${C2_FLAG:-}" in CHANGE_ME_*|"") warn "C2_FLAG nao definida no config.env - a flag do Cenario 2 ficara como placeholder" ;; esac
+
 MGMT_PUBIP="${MGMT_PUBIP:-}"
 [ -n "$MGMT_PUBIP" ] || MGMT_PUBIP="$(cat "$STATE_DIR/mgmt.pubip" 2>/dev/null || true)"
 [ -n "$MGMT_PUBIP" ] || die "defina MGMT_PUBIP=<ip> (ou rode o up.sh antes)"
@@ -50,15 +64,15 @@ $SSH "$REMOTE" 'cloud-init status --wait' 2>/dev/null || warn "cloud-init status
 
 log "Enviando código para /opt/workshop…"
 if command -v rsync >/dev/null; then
-  rsync -az --delete -e "$SSH" --exclude '.git' --exclude 'infra-oci/.state' --exclude '**/db.json' \
-    "$REPO/challenge1-sqli" "$REPO/challenge2-cmdi" "$REPO/challenge3-phishing" \
-    "$REPO/platform" "$REPO/infra-oci/guacamole" "$REPO/infra-oci/nginx" "$REMOTE:/opt/workshop/"
+  rsync -az --delete -e "$SSH" --exclude '.git' --exclude 'infra/oci/.state' --exclude '**/db.json' \
+    "$REPO/scenario-1-sqli" "$REPO/scenario-2-cmdi" "$REPO/phishing" \
+    "$REPO/platform" "$REPO/infra/oci/guacamole" "$REPO/infra/oci/nginx" "$REMOTE:/opt/workshop/"
 else
-  tar -C "$REPO" --exclude '.git' --exclude 'infra-oci/.state' -czf - \
-    challenge1-sqli challenge2-cmdi challenge3-phishing platform infra-oci/guacamole infra-oci/nginx \
+  tar -C "$REPO" --exclude '.git' --exclude 'infra/oci/.state' -czf - \
+    scenario-1-sqli scenario-2-cmdi phishing platform infra/oci/guacamole infra/oci/nginx \
     | $SSH "$REMOTE" 'mkdir -p /opt/workshop && tar --strip-components=0 -C /opt/workshop -xzf -'
-  # normaliza paths infra-oci/* -> topo
-  $SSH "$REMOTE" 'cd /opt/workshop && [ -d infra-oci ] && cp -r infra-oci/* . 2>/dev/null; true'
+  # normaliza paths infra/oci/* -> topo
+  $SSH "$REMOTE" 'cd /opt/workshop && [ -d infra/oci ] && cp -r infra/oci/* . 2>/dev/null; true'
 fi
 scp -i "$SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
   "$STATE_DIR/participant.ips" "$REMOTE:/opt/workshop/participant.ips" 2>/dev/null || true
@@ -68,7 +82,10 @@ $SSH "$REMOTE" \
   ENABLE_TLS="$ENABLE_TLS" DOMAIN="$DOMAIN" LE_EMAIL="$LE_EMAIL" CERT_CN="$MGMT_PUBIP" \
   RDP_USER="$RDP_USER" RDP_PASS="$RDP_PASS" \
   SIM_PORT="${SIM_PORT:-10000}" ADMIN_USER="${ADMIN_USER:-admin}" ADMIN_PASS="${ADMIN_PASS:-Cyber@2022}" \
-  PHISHING_URL="$PHISHING_URL" GUAC_ADMIN_PASS="$GUAC_ADMIN_PASS" bash -s <<'REMOTE_EOF'
+  PHISHING_URL="$PHISHING_URL" GUAC_ADMIN_PASS="$GUAC_ADMIN_PASS" \
+  C1_DB_NAME="$C1_DB_NAME" C1_DB_USER="$C1_DB_USER" C1_DB_PASSWORD="$C1_DB_PASSWORD" \
+  C1_FLAG="$C1_FLAG" C2_FLAG="$C2_FLAG" SESSION_SECRET="$SESSION_SECRET" ADMIN_KEY="$ADMIN_KEY" \
+  bash -s <<'REMOTE_EOF'
 set -e
 cd /opt/workshop
 export PHISHING_URL   # usado pela plataforma (docker-compose)
@@ -94,11 +111,28 @@ PART_CSV="$(paste -sd, participant.ips 2>/dev/null || true)"
   echo "ADMIN_PASS=${ADMIN_PASS:-Cyber@2022}"
   echo "SIM_PORT=${SIM_PORT:-10000}"
   echo "PARTICIPANT_IPS=$PART_CSV"
+  echo "SESSION_SECRET=${SESSION_SECRET:-troque-este-segredo-no-workshop}"
+  echo "ADMIN_KEY=${ADMIN_KEY:-troque-esta-chave-do-instrutor}"
+  echo "C1_FLAG=${C1_FLAG:-}"
+  echo "C2_FLAG=${C2_FLAG:-}"
 } > platform/.env
 echo "[platform] .env: $(grep -c . platform/.env) var(s); VMs no broadcast: $(echo "$PART_CSV" | tr ',' '\n' | grep -c .)"
 
+# .env do Cenario 1 (banco + flag via marcador __C1_FLAG__) e do Cenario 2
+# (flag via build arg C2_FLAG). O compose le o .env do proprio diretorio.
+{
+  echo "C1_DB_NAME=${C1_DB_NAME:-medclinic}"
+  echo "C1_DB_USER=${C1_DB_USER:-appuser}"
+  echo "C1_DB_PASSWORD=${C1_DB_PASSWORD:-app_pw_change_me}"
+  echo "C1_FLAG=${C1_FLAG:-}"
+} > scenario-1-sqli/.env
+{
+  echo "C2_FLAG=${C2_FLAG:-}"
+} > scenario-2-cmdi/.env
+echo "[c1/c2] .env escritos (flags da edicao aplicadas)"
+
 # sobe cenários + control (cenário 3) + plataforma + guacamole
-for d in challenge1-sqli challenge2-cmdi challenge3-phishing/control platform guacamole; do
+for d in scenario-1-sqli scenario-2-cmdi phishing/control platform guacamole; do
   [ -f "$d/docker-compose.yml" ] && (cd "$d" && D compose up -d --build) || true
 done
 

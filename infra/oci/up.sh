@@ -138,7 +138,7 @@ cp "$HERE/cloud-init/mgmt.yaml" "$CI_DIR/mgmt.rendered.yaml"
 SIM_PATH="$HERE/$SIM_SCRIPT"
 [ -f "$SIM_PATH" ] || die "não achei o script da simulação: $SIM_PATH"
 gzip -c "$SIM_PATH" | base64 -w0 > "$CI_DIR/sim.gz.b64"
-log "simulacao.ps1 embarcado ($(wc -c < "$SIM_PATH") bytes -> $(wc -c < "$CI_DIR/sim.gz.b64") b64)"
+log "simulacao-tela-cheia.ps1 embarcado ($(wc -c < "$SIM_PATH") bytes -> $(wc -c < "$CI_DIR/sim.gz.b64") b64)"
 
 python3 - "$HERE/cloud-init/participant-windows.ps1" "$CI_DIR/participant.rendered.ps1" \
   "$RDP_USER" "$RDP_PASS" "$SIM_PORT" "$CI_DIR/sim.gz.b64" <<'PY'
