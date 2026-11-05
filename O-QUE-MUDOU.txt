@@ -1,0 +1,147 @@
+================================================================
+ O QUE MUDOU NO REPO  (do projeto antigo pro workshop-cyber)
+================================================================
+
+Resumo rapido do que mudou. Detalhe fino ta em docs/migration.md.
+
+
+ESTRUTURA
+---------
+
+O repo do autor era:
+  challenge1-sqli/   challenge2-cmdi/   challenge3-phishing/
+  platform/   scripts/   infra-oci/
+
+Ficou:
+  scenario-1-sqli/   scenario-2-cmdi/   phishing/
+  platform/   simulation/   infra/oci/
+
+O que mudou de nome:
+  challenge1-sqli     -> scenario-1-sqli
+  challenge2-cmdi     -> scenario-2-cmdi
+  challenge3-phishing -> phishing
+  scripts/simulacao.ps1 -> simulation/simulacao-tela-cheia.ps1
+  infra-oci/          -> infra/oci/
+  db/ (dentro do c1)  -> seed/
+
+Entrou do zero: o deck (deck/index.html), os docs (docs/), o compose
+que sobe o lab inteiro de uma vez (infra/docker-compose.yml) e o
+LICENSE com a clausula etica.
+
+Detalhe: o deck e o PDF do participante NAO existiam no repo do autor.
+E o simulacao.ps1 da raiz foi substituido pela versao canonica dele,
+que e a que realmente roda nas VMs (a copia da raiz tava desatualizada:
+faltava o /voltar e tinha um bug de repaint que matava o listener).
+
+
+FLAGS (o gabarito)
+------------------
+
+Antes a flag tava CHUMBADA no codigo: no db.js da plataforma, no
+init.sql do banco, no Dockerfile do Meridian e no deck.
+
+Agora ninguem tem valor de flag no repo. Virou placeholder:
+  __C1_FLAG__  __C2_FLAG__   e   ARG C2_FLAG
+
+A flag real entra no deploy:
+  - o servico db troca o placeholder no seed antes de importar
+  - o docker build injeta a flag na imagem do Meridian
+  - a plataforma le do ambiente (C1_FLAG / C2_FLAG)
+
+Ate a plataforma eu mexi, pq era la que a flag estava hardcoded.
+
+
+DOMINIOS
+--------
+
+Os dominios "gatinhos" (meridiancapital-ti.com, nf-eletronica-br.com,
+meridian-docs-share.com...) viraram .example em tudo: deck, apps do
+Cenario 3, plataforma e docs. 50 trocas no total.
+
+O oficial (meridiancapital.com.br) tambem virou .example. E os dois
+typosquats tambem (meridiancapltal, do CFO, e meridlancapital, da isca)
+- esses dois nem estavam no mapa original, achei vasculhando os e-mails.
+
+O detalhe do CFO continua funcionando: o "l" no lugar do "i" continua
+destacado no deck, que e o ponto pedagogico dele.
+
+
+SENHAS
+------
+
+O infra-oci/config.env tinha senha de verdade E estava no git. Virou
+config.env.example, e o .env de verdade fica de fora.
+
+Os scripts agora entendem CHANGE_ME_* como "nao definido". Isso
+importa porque se voce so copiar o exemplo e deixar assim, o lab sobe
+com a senha padrao de boas (antes eu tinha quebrado isso: o placeholder
+ia por cima do default e o Guacamole recebia uma senha que nao era a
+das VMs).
+
+
+OS BUGS QUE APARECERAM NO CAMINHO
+---------------------------------
+
+1. Os .sh estavam sem bit de exec (commit feito no Windows). Num clone
+   em Linux, ./up.sh dava "Permission denied" e o ciclo nem comecava.
+
+2. webmail e control mapeavam a porta publica para 3002/3003 NO
+   CONTAINER, mas os apps escutam em 3000. Resultado: connection
+   refused.
+
+3. REPO e SIM_SCRIPT estavam com um nivel a menos. Vale no layout
+   antigo (infra-oci/ na raiz), mas no novo (infra/oci/) o caminho
+   mudou. O rsync falhou com codigo 23 e a mgmt ficou sem lab.
+
+4. Faltava jq no cloud-init da mgmt, mas o configure-mgmt.sh usa jq
+   la pra pegar o token do Guacamole. A semeadura das conexoes RDP
+   falhava em silencio.
+
+5. O rebuild perdeu as regras de firewall 3000-3005. A imagem Ubuntu
+   da Oracle fecha a INPUT em tudo que nao for 22/80/443/8080, e no
+   lab antigo essas regras tinham sido feitas a mao. Sem elas os
+   cenarios ficavam inacessiveis de fora.
+
+6. O nginx exige certificado (e a variante TLS do up). Sem TLS ele fica
+   em crash-loop. O up.sh normal roda com ENABLE_TLS=0 e os cenarios
+   nao ficam acessiveis de fora - tem que usar o up-tls.sh.
+
+
+AMBIENTE
+---------
+
+O lab foi derrubado e recriado do zero (11 VMs + a VCN). Agora:
+  - 9 VMs Windows de participante, todas com o simulacao-tela-cheia.ps1
+    novo embarcado (confirmei pelo sha256 do user_data em cada uma)
+  - mgmt nova em 163.176.49.254
+  - o IP da mgmt MUDOU, entao tem que atualizar link/QR code/e-mail
+  - a senha do admin do Guacamole foi regenerada
+
+O que ficou no ar:
+  Plataforma   https://163.176.49.254/
+  MedClinic    https://163.176.49.254:3000/
+  Meridian     https://163.176.49.254:3001/
+  Isca         https://163.176.49.254:3003/documento
+  Guacamole    http://163.176.49.254:8080/guacamole/
+
+Credenciais: RDP aluno/Workshop@2024, painel admin/Cyber@2022.
+
+
+ONDE TÁ O QUE
+--------------
+
+README.md            o que e o repo, como usar
+LOCAL_SETUP.md       passo a passo pra rodar local com Docker
+docs/migration.md    relatorio completo da migracao
+docs/instructor-notes.md   notas do instrutor (sem flag)
+docs/participant-guide.md  guia do participante em texto
+deck/index.html      o deck da apresentacao
+simulation/          o script de tela cheia
+scenario-1-sqli/     cenario 1 (SQLi) + seed
+scenario-2-cmdi/     cenario 2 (command injection)
+phishing/            cenario 3 (webmail + controle)
+platform/            placar e submissao de flag
+infra/               compose unificado + .env.example
+infra/oci/           provisionamento na OCI (up.sh / down.sh)
+
+================================================================
