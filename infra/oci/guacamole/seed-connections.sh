@@ -16,7 +16,13 @@ GUAC_URL="${GUAC_URL:-http://localhost:8080/guacamole}"
 GUAC_ADMIN="${GUAC_ADMIN:-guacadmin}"
 GUAC_PASS="${GUAC_PASS:-guacadmin}"
 RDP_USER="${RDP_USER:-aluno}"
-RDP_PASS="${RDP_PASS:-Workshop@2024}"
+# Placeholder CHANGE_ME_* do config.env.example = "nao definido" -> usa a senha
+# documentada do lab (a mesma que aparece nos guias do workshop).
+case "${RDP_PASS:-}" in CHANGE_ME_*) RDP_PASS="" ;; esac
+if [ -z "${RDP_PASS:-}" ]; then
+  echo "aviso: usando a senha RDP padrao do lab; defina RDP_PASS no config.env" >&2
+  RDP_PASS="Workshop@2024"
+fi
 
 need() { command -v "$1" >/dev/null || { echo "faltando: $1" >&2; exit 1; }; }
 need curl; need jq

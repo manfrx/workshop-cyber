@@ -12,6 +12,11 @@ source "$HERE/lib.sh"
 REPO="$(cd "$HERE/.." && pwd)"
 ENABLE_TLS="${ENABLE_TLS:-0}"
 
+# Placeholders CHANGE_ME_* do config.env.example contam como "nao definido",
+# assim o default documentado do lab continua valendo ate voce definir a senha.
+case "${RDP_PASS:-}"   in CHANGE_ME_*) RDP_PASS=""   ;; esac
+case "${ADMIN_PASS:-}" in CHANGE_ME_*) ADMIN_PASS="" ;; esac
+
 MGMT_PUBIP="${MGMT_PUBIP:-}"
 [ -n "$MGMT_PUBIP" ] || MGMT_PUBIP="$(cat "$STATE_DIR/mgmt.pubip" 2>/dev/null || true)"
 [ -n "$MGMT_PUBIP" ] || die "defina MGMT_PUBIP=<ip> (ou rode o up.sh antes)"
