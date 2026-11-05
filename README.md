@@ -121,7 +121,14 @@ for p in 3000 3001 3002 3003 3005; do
 done
 ```
 
-Os cinco devem responder `200` (o `3003` pode responder `404` na raiz — use `/documento`).
+Esperado: `302` (redireciona para o login) ou `200`. O MySQL responde em
+`127.0.0.1:3306` (só loopback).
+
+Os serviços `webmail`, `control` e `platform` também expõem `/health`:
+
+```bash
+for p in 3002 3003 3005; do curl -s "http://localhost:$p/health"; echo; done
+```
 
 ### 4. Provisionamento na OCI
 

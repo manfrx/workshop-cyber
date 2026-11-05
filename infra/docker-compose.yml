@@ -1,5 +1,3 @@
-version: "3.9"
-
 # =====================================================================
 #  Workshop "Do Conhecimento à Ação" — stack completa
 #
@@ -11,6 +9,9 @@ version: "3.9"
 #    3002 Webmail     (Cenário 3 · caixa de e-mail fictícia)
 #    3003 Controle    (Cenário 3 · página-isca + overlay)
 #    3005 Plataforma  (placar, quest de phishing e submissão de flags)
+#
+#  Convenção: todo app escuta em 3000 dentro do container; a porta pública
+#  do cenário é a da esquerda. O banco só escuta no loopback do host.
 # =====================================================================
 
 services:
@@ -23,7 +24,7 @@ services:
   #  permanece intacto no disco.
   # ---------------------------------------------------------------
   db:
-    image: mysql:8
+    image: mysql:8.0
     restart: unless-stopped
     entrypoint:
       - /bin/sh
@@ -54,6 +55,9 @@ services:
     volumes:
       - ./../scenario-1-sqli/seed:/seed:ro
       - dbdata:/var/lib/mysql
+    ports:
+      # Só no loopback do host — o banco não é exposto na internet.
+      - "127.0.0.1:3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${C1_DB_PASSWORD}"]
       interval: 10s
@@ -104,7 +108,7 @@ services:
     build: ../phishing/webmail
     restart: unless-stopped
     ports:
-      - "${C3_PORT}:3002"
+      - "${C3_PORT}:3000"
     environment:
       PORT: 3000
       PHISHING_URL: ${PHISHING_URL}
@@ -116,7 +120,7 @@ services:
     build: ../phishing/control
     restart: unless-stopped
     ports:
-      - "${C3_CONTROL_PORT}:3003"
+      - "${C3_CONTROL_PORT}:3000"
     environment:
       PORT: 3000
       HACK_URL: ${HACK_URL}
