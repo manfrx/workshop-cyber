@@ -9,7 +9,10 @@
 HERE="$(cd "$(dirname "$0")" && pwd)"
 source "$HERE/config.env"
 source "$HERE/lib.sh"
-REPO="$(cd "$HERE/.." && pwd)"
+# A raiz do repo esta DOIS niveis acima: infra/oci -> infra -> raiz.
+REPO="$(cd "$HERE/../.." && pwd)"
+[ -d "$REPO/scenario-1-sqli" ] || die "raiz do repo invalida: $REPO (esperado scenario-1-sqli/ e platform/)"
+[ -d "$REPO/infra/oci/guacamole" ] || die "raiz do repo invalida: $REPO (esperado infra/oci/guacamole/)"
 ENABLE_TLS="${ENABLE_TLS:-0}"
 
 # Placeholders CHANGE_ME_* do config.env.example contam como "nao definido",
